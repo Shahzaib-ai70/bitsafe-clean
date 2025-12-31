@@ -47,14 +47,14 @@
 
     <!-- Top Header -->
     <div class="p-4 flex items-center justify-between sticky top-0 bg-white z-10 transition-colors duration-200">
-        <button id="gridMenuBtn" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3 shadow-sm hover:bg-gray-200 transition-colors" aria-label="Menu">
+        <button id="gridMenuBtn" onclick="openProfileMenu()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3 shadow-sm hover:bg-gray-200 transition-colors" aria-label="Menu">
             <i class="fa-solid fa-user text-gray-700 text-lg"></i>
         </button>
         <div class="flex items-center bg-gray-100 rounded-full px-3 py-2 flex-1 mr-4 transition-colors duration-200">
             <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
             <input type="text" placeholder="BTC/USDT" class="bg-transparent border-none outline-none text-sm w-full placeholder-gray-400">
         </div>
-        <button id="csBtn" class="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+        <button id="csBtn" onclick="openCsModal()" class="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
             <i class="fa-solid fa-headset text-xl text-gray-700"></i>
             <span class="absolute top-2 right-2 bg-red-500 rounded-full w-2 h-2 border border-white"></span>
         </button>
@@ -571,23 +571,20 @@
         const csBtn = document.getElementById('csBtn');
         const csModal = document.getElementById('csModal');
         const closeCsBtn = document.getElementById('closeCsBtn');
+        function openCsModal(){ csModal.classList.remove('hidden'); }
+        function closeCs(){ csModal.classList.add('hidden'); }
         
-        csBtn?.addEventListener('click', () => {
-            csModal.classList.remove('hidden');
-        });
+        csBtn?.addEventListener('click', openCsModal);
         
-        closeCsBtn?.addEventListener('click', () => {
-            csModal.classList.add('hidden');
-        });
+        closeCsBtn?.addEventListener('click', closeCs);
         
         csModal?.addEventListener('click', (e) => {
             if(e.target === csModal) {
-                csModal.classList.add('hidden');
+                closeCs();
             }
         });
 
-        gridBtn?.addEventListener('click', function () {
-            console.log("Profile button clicked");
+        function openProfileMenu(){
             const u = localStorage.getItem('authUser');
             userNameEl.textContent = u ? u : 'Guest';
             menuEl.classList.remove('hidden');
@@ -612,7 +609,8 @@
                 })
                 .catch(()=>{});
             }
-        });
+        }
+        gridBtn?.addEventListener('click', openProfileMenu);
         menuBackBtn?.addEventListener('click', function () {
             menuEl.classList.add('hidden');
         });
