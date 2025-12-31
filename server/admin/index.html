@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bitsafe Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item.active { background-color: #374151; }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 text-white fixed h-full">
+      <div class="px-4 py-4 flex items-center border-b border-gray-800">
+        <i class="fa-brands fa-bitcoin text-yellow-400 text-2xl mr-2"></i>
+        <span class="text-xl font-bold">Bitsafe</span>
+      </div>
+      <nav class="mt-4 space-y-1">
+        <a href="#" onclick="showSection('dashboard')" class="nav-item block px-4 py-3 text-sm hover:bg-gray-800 active" id="nav-dashboard">
+          <i class="fa-solid fa-chart-line w-5 mr-2"></i> Dashboard
+        </a>
+        <a href="#" onclick="showSection('users')" class="nav-item block px-4 py-3 text-sm hover:bg-gray-800" id="nav-users">
+          <i class="fa-solid fa-users w-5 mr-2"></i> User Management
+        </a>
+        <a href="#" onclick="showSection('finance')" class="nav-item block px-4 py-3 text-sm hover:bg-gray-800" id="nav-finance">
+          <i class="fa-solid fa-money-bill-transfer w-5 mr-2"></i> Deposit & Withdraw
+        </a>
+        <a href="#" onclick="showSection('trades')" class="nav-item block px-4 py-3 text-sm hover:bg-gray-800" id="nav-trades">
+          <i class="fa-solid fa-gavel w-5 mr-2"></i> Trade Handling
+        </a>
+        <a href="#" onclick="showSection('verifications')" class="nav-item block px-4 py-3 text-sm hover:bg-gray-800" id="nav-verifications">
+          <i class="fa-solid fa-id-card w-5 mr-2"></i> Real Name Verification
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 ml-64">
+      <header class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
+        <div class="text-lg font-bold text-gray-800" id="pageTitle">Dashboard</div>
+        <div class="flex items-center space-x-4">
+          <span class="text-sm font-medium text-gray-600">Admin</span>
+          <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+            <i class="fa-solid fa-user text-gray-500"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- User Details Modal -->
+      <div id="userDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+          <div class="bg-white rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto m-4 shadow-2xl">
+              <!-- Header -->
+              <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                  <div>
+                      <h2 class="text-2xl font-bold text-gray-800" id="detailUsername">User Details</h2>
+                      <div class="text-sm text-gray-500 mt-1">Manage user account and balances</div>
+                  </div>
+                  <div class="flex items-center gap-3">
+                      <span id="detailStatusBadge" class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">Active</span>
+                      <button onclick="toggleUserFreeze()" id="btnFreeze" class="px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-sm font-medium transition-colors">
+                          <i class="fa-solid fa-ban mr-2"></i>Freeze Account
+                      </button>
+                      <button onclick="closeUserDetails()" class="ml-4 text-gray-400 hover:text-gray-600">
+                          <i class="fa-solid fa-xmark text-2xl"></i>
+                      </button>
+                  </div>
+              </div>
+
+              <div class="p-8">
+                  <!-- Stats Grid -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                      <div class="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                          <div class="text-blue-600 text-sm font-semibold uppercase tracking-wide mb-2">Total Deposited</div>
+                          <div class="text-3xl font-bold text-gray-800" id="detailTotalDeposit">0.00</div>
+                          <div class="text-sm text-blue-400 mt-1">Approved deposits</div>
+                      </div>
+                      <div class="bg-purple-50 rounded-xl p-6 border border-purple-100">
+                          <div class="text-purple-600 text-sm font-semibold uppercase tracking-wide mb-2">Total Withdrawn</div>
+                          <div class="text-3xl font-bold text-gray-800" id="detailTotalWithdraw">0.00</div>
+                          <div class="text-sm text-purple-400 mt-1">Approved withdrawals</div>
+                      </div>
+                  </div>
+
+                  <!-- Wallet Section -->
+                  <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                      <i class="fa-solid fa-wallet text-gray-400 mr-2"></i> Wallet Balances
+                  </h3>
+                  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                      <table class="w-full text-left text-sm">
+                          <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                              <tr>
+                                  <th class="px-6 py-4">Coin</th>
+                                  <th class="px-6 py-4">Balance</th>
+                                  <th class="px-6 py-4 text-right">Action</th>
+                              </tr>
+                          </thead>
+                          <tbody id="detailWalletTable" class="divide-y divide-gray-100">
+                              <!-- Dynamic Rows -->
+                          </tbody>
+                      </table>
+                  </div>
+
+                  <!-- Trade Settings -->
+                  <h3 class="text-lg font-bold text-gray-800 mb-4 mt-8 flex items-center">
+                      <i class="fa-solid fa-sliders text-gray-400 mr-2"></i> Trade Settings
+                  </h3>
+                  <div class="bg-white border border-gray-200 rounded-xl p-6">
+                      <div class="mb-4">
+                          <label class="block text-sm font-medium text-gray-700 mb-1">Minimum Trade Amount (USDT)</label>
+                          <input id="detailMinTrade" type="number" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="10">
+                      </div>
+                      
+                      <div class="mb-4">
+                          <label class="block text-sm font-medium text-gray-700 mb-2">Time & Profit Percentage Settings</label>
+                          <div class="grid grid-cols-2 gap-4 mb-2 font-medium text-xs text-gray-500 uppercase">
+                              <div>Seconds</div>
+                              <div>Profit %</div>
+                          </div>
+                          <div id="tradeSettingsContainer" class="space-y-3">
+                              <!-- Dynamic Inputs -->
+                          </div>
+                      </div>
+                      
+                      <div class="text-right">
+                          <button onclick="saveTradeSettings()" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow-sm transition-colors">
+                              Save Settings
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <!-- Simple Add Balance Modal (Reused/Modified) -->
+      <div id="addMoneyModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[60] flex items-center justify-center">
+          <div class="bg-white rounded-xl p-6 w-full max-w-sm shadow-xl transform transition-all scale-100">
+              <h3 class="text-lg font-bold text-gray-800 mb-4">Add Funds</h3>
+              <p class="text-sm text-gray-500 mb-4">Adding to <span id="addMoneyCoin" class="font-bold text-gray-900"></span> for <span id="addMoneyUser" class="font-bold text-gray-900"></span></p>
+              
+              <div class="space-y-4">
+                  <div>
+                      <label class="block text-xs font-medium text-gray-500 mb-1">Amount to Add</label>
+                      <input id="addMoneyAmount" type="number" step="any" class="w-full border border-gray-300 rounded-lg px-4 py-3 text-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100" placeholder="0.00">
+                  </div>
+                  <div class="flex space-x-3 pt-2">
+                      <button onclick="closeAddMoneyModal()" class="flex-1 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-50">Cancel</button>
+                      <button onclick="confirmAddMoney()" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-md">Confirm</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      <div class="p-8">
+        <!-- Dashboard Section -->
+        <div id="section-dashboard" class="space-y-6">
+          <div class="grid grid-cols-4 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Total Net Deposit</div>
+              <div class="text-gray-900 font-bold text-2xl" id="platformRechargeUpDown">0.00</div>
+              <div class="mt-2 text-xs text-green-600 flex items-center">
+                <i class="fa-solid fa-arrow-up mr-1"></i> All time
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Total New Users</div>
+              <div class="text-gray-900 font-bold text-2xl" id="totalUsers">0</div>
+              <div class="mt-2 text-xs text-blue-600 flex items-center">
+                <i class="fa-solid fa-users mr-1"></i> All time
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Today's Net Deposit</div>
+              <div class="text-gray-900 font-bold text-2xl" id="todayRechargeUpDown">0.00</div>
+              <div class="mt-2 text-xs text-green-600 flex items-center">
+                <i class="fa-solid fa-calendar-day mr-1"></i> Today
+              </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <div class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Frozen Accounts</div>
+              <div class="text-gray-900 font-bold text-2xl" id="frozenUsers">0</div>
+              <div class="mt-2 text-xs text-red-600 flex items-center">
+                <i class="fa-solid fa-ban mr-1"></i> Current
+              </div>
+            </div>
+          </div>
+          
+          <!-- Charts Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                 <h3 class="text-gray-800 text-sm font-bold mb-4">Daily Net Income (7 Days)</h3>
+                 <canvas id="incomeChart"></canvas>
+             </div>
+             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                 <h3 class="text-gray-800 text-sm font-bold mb-4">New Users (7 Days)</h3>
+                 <canvas id="usersChart"></canvas>
+             </div>
+          </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="section-users" class="hidden space-y-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="font-bold text-gray-800">New Members</h3>
+              <button onclick="loadUsers()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-6 py-3">ID</th>
+                    <th class="px-6 py-3">Username</th>
+                    <th class="px-6 py-3">Balance</th>
+                    <th class="px-6 py-3">Joined At</th>
+                    <th class="px-6 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTable" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finance Section -->
+        <div id="section-finance" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Deposits -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="font-bold text-gray-800">Deposit Requests</h3>
+              <button onclick="loadDeposits()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-4 py-3">User</th>
+                    <th class="px-4 py-3">Amount</th>
+                    <th class="px-4 py-3">Proof</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="depositsTable" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Withdrawals -->
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="font-bold text-gray-800">Withdrawal Requests</h3>
+              <button onclick="loadWithdrawals()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-4 py-3">User</th>
+                    <th class="px-4 py-3">Amount</th>
+                    <th class="px-4 py-3">Network</th>
+                    <th class="px-4 py-3">Address</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="withdrawalsTable" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trade Handling Section -->
+        <div id="section-trades" class="hidden space-y-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="font-bold text-gray-800 mb-4">Trade Control</h3>
+            <div class="flex items-center space-x-4">
+              <span class="text-sm font-medium text-gray-600">Force Win Side:</span>
+              <div class="flex bg-gray-100 p-1 rounded-lg">
+                <button onclick="setWinSide('long')" id="btn-win-long" class="px-4 py-2 rounded-md text-sm font-medium transition-colors">Long Wins</button>
+                <button onclick="setWinSide('short')" id="btn-win-short" class="px-4 py-2 rounded-md text-sm font-medium transition-colors">Short Wins</button>
+              </div>
+              <span id="winSideStatus" class="text-xs text-gray-400 italic">Current: -</span>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">When a user opens a trade, if their direction matches this setting, they win. Otherwise they lose.</p>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="font-bold text-gray-800">Recent Trades</h3>
+              <button onclick="loadTrades()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-6 py-3">ID</th>
+                    <th class="px-6 py-3">User</th>
+                    <th class="px-6 py-3">Symbol</th>
+                    <th class="px-6 py-3">Side</th>
+                    <th class="px-6 py-3">Amount</th>
+                    <th class="px-6 py-3">Result</th>
+                    <th class="px-6 py-3">Profit</th>
+                    <th class="px-6 py-3">Time</th>
+                  </tr>
+                </thead>
+                <tbody id="tradesTable" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real Name Verification Section -->
+        <div id="section-verifications" class="hidden space-y-6">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 class="font-bold text-gray-800">Real Name Verification</h3>
+              <button onclick="loadVerifications()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm text-left">
+                <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+                  <tr>
+                    <th class="px-4 py-3">User</th>
+                    <th class="px-4 py-3">Type</th>
+                    <th class="px-4 py-3">Doc Type</th>
+                    <th class="px-4 py-3">Doc Number</th>
+                    <th class="px-4 py-3">Images</th>
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="verificationsTable" class="divide-y divide-gray-100"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const apiBase = location.origin.replace(/\/admin$/, '');
+
+    // Navigation
+    function showSection(section) {
+      document.querySelectorAll('[id^="section-"]').forEach(el => el.classList.add('hidden'));
+      document.getElementById('section-' + section).classList.remove('hidden');
+      
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'bg-gray-800'));
+      document.getElementById('nav-' + section).classList.add('active', 'bg-gray-800');
+
+      const titles = {
+        'dashboard': 'Dashboard',
+        'users': 'User Management',
+        'finance': 'Deposit & Withdraw',
+        'trades': 'Trade Handling',
+        'verifications': 'Real Name Verification'
+      };
+      document.getElementById('pageTitle').textContent = titles[section];
+
+      if(section === 'users') loadUsers();
+      if(section === 'finance') { loadDeposits(); loadWithdrawals(); }
+      if(section === 'trades') { loadTrades(); checkWinSide(); }
+      if(section === 'verifications') { loadVerifications(); }
+    }
+
+    // Load Summary
+    let incomeChart = null;
+    let usersChart = null;
+
+    async function loadSummary() {
+      try {
+        // Fetch Stats
+        const r = await fetch(apiBase + '/api/admin/stats');
+        const stats = await r.json();
+        document.getElementById('platformRechargeUpDown').textContent = stats.platformRechargeUpDown.toFixed(2);
+        document.getElementById('totalUsers').textContent = stats.totalUsers;
+        document.getElementById('todayRechargeUpDown').textContent = stats.todayRechargeUpDown.toFixed(2);
+        document.getElementById('frozenUsers').textContent = stats.frozenUsers;
+        
+        // Fetch Charts
+        const rc = await fetch(apiBase + '/api/admin/charts');
+        const chartData = await rc.json();
+        renderCharts(chartData);
+
+      } catch (e) { console.error(e); }
+    }
+
+    function renderCharts(data) {
+        // Data format: { labels: [], income: [], users: [] }
+        const labels = data.labels;
+        const incomeData = data.income;
+        const usersData = data.users;
+
+        const ctxIncome = document.getElementById('incomeChart').getContext('2d');
+        if (incomeChart) {
+            incomeChart.data.labels = labels;
+            incomeChart.data.datasets[0].data = incomeData;
+            incomeChart.update();
+        } else {
+            incomeChart = new Chart(ctxIncome, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net Income (USDT)',
+                        data: incomeData,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        const ctxUsers = document.getElementById('usersChart').getContext('2d');
+        if (usersChart) {
+            usersChart.data.labels = labels;
+            usersChart.data.datasets[0].data = usersData;
+            usersChart.update();
+        } else {
+            usersChart = new Chart(ctxUsers, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'New Users',
+                        data: usersData,
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+    }
+
+    // Auto-refresh every 5 seconds
+    setInterval(loadSummary, 5000);
+    loadSummary();
+
+
+    // Load Users
+    async function loadUsers() {
+      const users = await (await fetch(apiBase + '/api/admin/users')).json();
+      document.getElementById('usersTable').innerHTML = users.map(u => `
+        <tr>
+          <td class="px-6 py-4 font-medium text-gray-900">#${u.id}</td>
+          <td class="px-6 py-4">
+              <div class="flex items-center">
+                  <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3 text-gray-500 font-bold">
+                      ${u.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                      <div class="font-medium text-gray-900">${u.username}</div>
+                      <div class="text-xs ${u.status === 'frozen' ? 'text-red-500' : 'text-gray-500'}">${u.status || 'active'}</div>
+                  </div>
+              </div>
+          </td>
+          <td class="px-6 py-4 font-bold text-green-600">${u.balance.toFixed(2)}</td>
+          <td class="px-6 py-4 text-gray-500">${new Date(u.created_at).toLocaleString()}</td>
+          <td class="px-6 py-4">
+             <button onclick="openUserDetails('${u.username}')" class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium hover:bg-blue-100 border border-blue-200 transition-colors">
+                <i class="fa-solid fa-eye mr-1"></i> Details
+             </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    /* ================= USER DETAILS LOGIC ================= */
+    let currentDetailUser = null;
+    let currentDetailData = null;
+
+    async function openUserDetails(username) {
+        currentDetailUser = username;
+        document.getElementById('userDetailsModal').classList.remove('hidden');
+        document.getElementById('detailUsername').textContent = username;
+        
+        await loadUserDetailsData();
+    }
+
+    async function loadUserDetailsData() {
+        if (!currentDetailUser) return;
+        
+        try {
+            const r = await fetch(apiBase + '/api/admin/user/' + currentDetailUser + '/details');
+            const data = await r.json();
+            currentDetailData = data;
+
+            // Status Badge
+            const statusBadge = document.getElementById('detailStatusBadge');
+            const btnFreeze = document.getElementById('btnFreeze');
+            
+            if (data.user.status === 'frozen') {
+                statusBadge.textContent = 'Frozen';
+                statusBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800';
+                btnFreeze.innerHTML = '<i class="fa-solid fa-check mr-2"></i>Unfreeze Account';
+                btnFreeze.className = 'px-4 py-2 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg text-sm font-medium transition-colors';
+            } else {
+                statusBadge.textContent = 'Active';
+                statusBadge.className = 'px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800';
+                btnFreeze.innerHTML = '<i class="fa-solid fa-ban mr-2"></i>Freeze Account';
+                btnFreeze.className = 'px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg text-sm font-medium transition-colors';
+            }
+
+            // Stats
+            document.getElementById('detailTotalDeposit').textContent = data.total_deposited.toFixed(2);
+            document.getElementById('detailTotalWithdraw').textContent = data.total_withdrawn.toFixed(2);
+
+            // Wallet Table
+            const coins = ["USDT", "BTC", "ETH", "BNB", "XRP", "ADA", "SOL", "DOGE", "TRX", "LTC", "DOT", "USDC", "SHIB"];
+            const tbody = document.getElementById('detailWalletTable');
+            tbody.innerHTML = '';
+
+            coins.forEach(coin => {
+                // Find balance
+                const bObj = data.balances.find(b => b.currency === coin);
+                let amount = bObj ? bObj.amount : 0;
+                
+                // If coin is USDT and amount is 0, check user.balance (legacy)
+                if (coin === 'USDT' && amount === 0 && data.user.balance > 0) {
+                     amount = data.user.balance;
+                }
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-gray-900 flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">${coin.charAt(0)}</div>
+                        ${coin}
+                    </td>
+                    <td class="px-6 py-4 font-bold text-gray-800">${amount.toFixed(4)}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openAddMoneyModal('${coin}')" class="text-blue-600 hover:text-blue-800 font-medium text-xs border border-blue-200 hover:bg-blue-50 px-3 py-1 rounded transition-colors">
+                            + Add Balance
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Trade Settings
+            document.getElementById('detailMinTrade').value = data.user.min_trade_amount || 10;
+            
+            const settingsContainer = document.getElementById('tradeSettingsContainer');
+            settingsContainer.innerHTML = '';
+            
+            let settings = [];
+            try {
+                settings = JSON.parse(data.user.trade_settings || '[]');
+            } catch(e) {}
+            
+            // Defaults if empty
+            if (settings.length === 0) {
+                settings = [
+                    { seconds: 30, percent: 25 },
+                    { seconds: 60, percent: 50 },
+                    { seconds: 120, percent: 75 },
+                    { seconds: 300, percent: 100 }
+                ];
+            }
+            
+            settings.forEach((s, idx) => {
+                const div = document.createElement('div');
+                div.className = 'grid grid-cols-2 gap-4';
+                div.innerHTML = `
+                    <input type="number" class="trade-seconds border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100" value="${s.seconds}" placeholder="Seconds">
+                    <input type="number" class="trade-percent border border-gray-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-100" value="${s.percent}" placeholder="Percent">
+                `;
+                settingsContainer.appendChild(div);
+            });
+
+        } catch(e) {
+            console.error(e);
+            alert('Failed to load user details');
+        }
+    }
+
+    async function saveTradeSettings() {
+        if (!currentDetailUser) return;
+        
+        const minTrade = parseFloat(document.getElementById('detailMinTrade').value);
+        if (isNaN(minTrade) || minTrade < 0) {
+            alert('Invalid minimum trade amount');
+            return;
+        }
+        
+        const settingsContainer = document.getElementById('tradeSettingsContainer');
+        const rows = settingsContainer.querySelectorAll('.grid');
+        const settings = [];
+        
+        rows.forEach(row => {
+            const sec = parseFloat(row.querySelector('.trade-seconds').value);
+            const pct = parseFloat(row.querySelector('.trade-percent').value);
+            if (!isNaN(sec) && !isNaN(pct)) {
+                settings.push({ seconds: sec, percent: pct });
+            }
+        });
+        
+        try {
+            await fetch(apiBase + '/api/admin/users/settings', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    username: currentDetailUser, 
+                    min_trade_amount: minTrade,
+                    trade_settings: settings
+                })
+            });
+            alert('Settings saved successfully');
+        } catch(e) {
+            alert('Failed to save settings');
+        }
+    }
+
+    function closeUserDetails() {
+        document.getElementById('userDetailsModal').classList.add('hidden');
+        currentDetailUser = null;
+        loadUsers(); // Refresh main list
+    }
+
+    async function toggleUserFreeze() {
+        if (!currentDetailUser || !currentDetailData) return;
+        const newStatus = currentDetailData.user.status === 'frozen' ? 'active' : 'frozen';
+        
+        if (!confirm(`Are you sure you want to ${newStatus} this user?`)) return;
+
+        try {
+            await fetch(apiBase + '/api/admin/users/freeze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: currentDetailUser, status: newStatus })
+            });
+            await loadUserDetailsData(); // Reload details
+        } catch(e) {
+            alert('Failed to update status');
+        }
+    }
+
+    /* ================= ADD MONEY LOGIC ================= */
+    let currentAddCoin = null;
+
+    function openAddMoneyModal(coin) {
+        currentAddCoin = coin;
+        document.getElementById('addMoneyModal').classList.remove('hidden');
+        document.getElementById('addMoneyCoin').textContent = coin;
+        document.getElementById('addMoneyUser').textContent = currentDetailUser;
+        document.getElementById('addMoneyAmount').value = '';
+        document.getElementById('addMoneyAmount').focus();
+    }
+
+    function closeAddMoneyModal() {
+        document.getElementById('addMoneyModal').classList.add('hidden');
+        currentAddCoin = null;
+    }
+
+    async function confirmAddMoney() {
+        const amount = parseFloat(document.getElementById('addMoneyAmount').value);
+        if (isNaN(amount) || amount === 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
+
+        try {
+            await fetch(apiBase + '/api/admin/users/add-coin-balance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    username: currentDetailUser, 
+                    currency: currentAddCoin, 
+                    amount: amount 
+                })
+            });
+            closeAddMoneyModal();
+            await loadUserDetailsData(); // Refresh the wallet table
+            alert('Balance added successfully');
+        } catch(e) {
+            alert('Failed to add balance');
+        }
+    }
+
+    // Finance
+    function actionButtons(type, id, status) {
+      if(status !== 'pending') return `<span class="px-2 py-1 rounded-full text-xs font-medium ${status === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${status}</span>`;
+      return `
+        <button onclick="updateStatus('${type}', '${id}', 'approved')" class="px-3 py-1 bg-green-500 text-white rounded text-xs mr-1 hover:bg-green-600">Approve</button>
+        <button onclick="updateStatus('${type}', '${id}', 'rejected')" class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">Reject</button>
+      `;
+    }
+
+    async function updateStatus(type, id, status) {
+      let endpoint = '';
+      if(type === 'deposit') endpoint = `/api/deposit/${id}/status`;
+      else if(type === 'withdraw') endpoint = `/api/withdraw/${id}/status`;
+      else if(type === 'verification') endpoint = `/api/admin/verification/${id}/status`;
+      await fetch(apiBase + endpoint, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ status })
+      });
+      if(type === 'deposit') loadDeposits();
+      else if(type === 'withdraw') loadWithdrawals();
+      else if(type === 'verification') loadVerifications();
+    }
+
+    async function loadDeposits() {
+      const d = await (await fetch(apiBase + '/api/deposits')).json();
+      document.getElementById('depositsTable').innerHTML = d.map(x => `
+        <tr>
+          <td class="px-4 py-3">${x.username || 'Unknown'}</td>
+          <td class="px-4 py-3">${x.amount} ${x.currency}</td>
+          <td class="px-4 py-3">
+             ${x.proof_image ? `<a href="${apiBase}${x.proof_image}" target="_blank" class="text-blue-500 hover:underline"><i class="fa-solid fa-image"></i> View</a>` : '-'}
+          </td>
+          <td class="px-4 py-3"><span class="capitalize">${x.status}</span></td>
+          <td class="px-4 py-3">${actionButtons('deposit', x.id, x.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadWithdrawals() {
+      const w = await (await fetch(apiBase + '/api/withdrawals')).json();
+      document.getElementById('withdrawalsTable').innerHTML = w.map(x => `
+        <tr>
+          <td class="px-4 py-3">${x.username || 'Unknown'}</td>
+          <td class="px-4 py-3">${x.amount} ${x.currency}</td>
+          <td class="px-4 py-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">${x.network || '-'}</span></td>
+          <td class="px-4 py-3 font-mono text-xs text-gray-500 max-w-xs truncate" title="${x.address || ''}">${x.address || '-'}</td>
+          <td class="px-4 py-3"><span class="capitalize">${x.status}</span></td>
+          <td class="px-4 py-3">${actionButtons('withdraw', x.id, x.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Trades
+    async function loadTrades() {
+      const t = await (await fetch(apiBase + '/api/trades')).json();
+      document.getElementById('tradesTable').innerHTML = t.map(x => `
+        <tr>
+          <td class="px-6 py-4">#${x.id}</td>
+          <td class="px-6 py-4">${x.username}</td>
+          <td class="px-6 py-4">${x.symbol}</td>
+          <td class="px-6 py-4 uppercase ${x.side === 'long' ? 'text-green-600' : 'text-red-600'}">${x.side}</td>
+          <td class="px-6 py-4">${x.amount}</td>
+          <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs ${x.result === 'win' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} uppercase">${x.result}</span></td>
+          <td class="px-6 py-4 font-medium ${x.profit >= 0 ? 'text-green-600' : 'text-red-600'}">${x.profit.toFixed(2)}</td>
+          <td class="px-6 py-4 text-xs text-gray-500">${new Date(x.created_at).toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadVerifications() {
+      const list = await (await fetch(apiBase + '/api/admin/verifications')).json();
+      document.getElementById('verificationsTable').innerHTML = list.map(v => `
+        <tr>
+          <td class="px-4 py-3">${v.username || '-'}</td>
+          <td class="px-4 py-3 capitalize">${v.kind}</td>
+          <td class="px-4 py-3">${v.document_type || '-'}</td>
+          <td class="px-4 py-3">${v.document_number || '-'}</td>
+          <td class="px-4 py-3 space-x-2">
+            ${v.front_image ? `<a href="${apiBase}${v.front_image}" target="_blank" class="text-blue-500 hover:underline">Front</a>` : ''}
+            ${v.back_image ? `<a href="${apiBase}${v.back_image}" target="_blank" class="text-blue-500 hover:underline">Back</a>` : ''}
+            ${v.selfie_image ? `<a href="${apiBase}${v.selfie_image}" target="_blank" class="text-blue-500 hover:underline">Selfie</a>` : ''}
+          </td>
+          <td class="px-4 py-3"><span class="capitalize">${v.status}</span></td>
+          <td class="px-4 py-3">${actionButtons('verification', v.id, v.status)}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function setWinSide(side) {
+      await fetch(apiBase + '/api/admin/winside', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ side })
+      });
+      checkWinSide(side);
+    }
+
+    async function checkWinSide(optimisticSide) {
+      if(optimisticSide) {
+         updateWinSideUI(optimisticSide);
+         return;
+      }
+      // Note: We don't have a GET for winside, but we can infer or add it. 
+      // For now, let's just use the setter to init or simple UI state.
+      // Actually, let's just rely on button clicks for now as state isn't persisted in DB, just memory.
+      // Default is 'short' per server code.
+    }
+
+    function updateWinSideUI(side) {
+      document.getElementById('btn-win-long').className = `px-4 py-2 rounded-md text-sm font-medium transition-colors ${side === 'long' ? 'bg-green-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`;
+      document.getElementById('btn-win-short').className = `px-4 py-2 rounded-md text-sm font-medium transition-colors ${side === 'short' ? 'bg-red-600 text-white shadow' : 'text-gray-600 hover:bg-gray-200'}`;
+      document.getElementById('winSideStatus').textContent = 'Current: ' + side.toUpperCase() + ' wins';
+    }
+
+    // Init
+    loadSummary();
+    updateWinSideUI('short'); // Default server state
+  </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitsafe - Quotes</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8;
+        }
+        .text-green-custom {
+            color: #0ECB81;
+        }
+        .bg-green-custom {
+            background-color: #0ECB81;
+        }
+        .text-yellow-custom {
+            color: #F0B90B;
+        }
+        .bg-yellow-custom {
+            background-color: #ffb11a;
+        }
+        .bottom-nav-item.active {
+            color: #1f2937;
+        }
+        .bottom-nav-item {
+            color: #9ca3af;
+        }
+        /* Hide scrollbar for horizontal scroll areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="pb-20 max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-x-hidden">
+
+    <!-- Top Header -->
+    <div class="p-4 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div class="flex items-center bg-gray-100 rounded-full px-3 py-2 flex-1">
+            <i class="fa-solid fa-magnifying-glass text-gray-800 mr-2 font-bold text-lg"></i>
+            <input type="text" placeholder="BTC/USDT" class="bg-transparent border-none outline-none text-sm w-full placeholder-gray-400">
+        </div>
+        <div class="ml-4">
+             <i class="fa-solid fa-headset text-xl text-gray-700 opacity-0"></i> <!-- Invisible spacer if needed, or just remove -->
+        </div>
+    </div>
+    <!-- Note: In the screenshot, the header is cleaner, just the search bar. I adjusted the icon color to black as per screenshot. -->
+
+    <!-- Market Tabs -->
+    <div class="px-4 pt-2">
+        <div class="flex space-x-6 mt-4 text-sm text-gray-500 font-medium border-b border-gray-100 pb-2">
+            <div id="tabCrypto" class="text-gray-900 border-b-2 border-yellow-custom pb-1 cursor-pointer" data-i18n="crypto">Crypto</div>
+            <div id="tabStock" class="cursor-pointer" data-i18n="stock">Stock</div>
+            <div id="tabForex" class="cursor-pointer" data-i18n="forex">Forex</div>
+            <div id="tabGold" class="cursor-pointer" data-i18n="gold">Gold</div>
+        </div>
+    </div>
+
+    <!-- List Header -->
+    <div class="flex justify-between px-4 mt-4 text-xs text-gray-400 mb-2">
+        <div class="w-1/3 text-left" data-i18n="name_volume">Name/Volume</div>
+        <div class="w-1/3 text-center" data-i18n="latest_price">Latest Price</div>
+        <div class="w-1/3 text-right" data-i18n="24h_chg">24h chg</div>
+    </div>
+
+    <div id="quotesList" class="px-4 space-y-6 pb-4"></div>
+
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-6 flex justify-between items-center z-20 max-w-md mx-auto">
+        <a href="index.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="home_page">Home Page</span>
+        </a>
+        <div class="flex flex-col items-center bottom-nav-item active text-gray-900 cursor-pointer">
+            <i class="fa-solid fa-chart-simple text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="quotes">Quotes</span>
+        </div>
+        <a href="transaction.html" class="relative -top-5">
+            <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                <i class="fa-solid fa-arrow-right-arrow-left text-white text-lg transform rotate-45"></i>
+            </div>
+            <div class="text-center mt-1">
+                <span class="text-[10px] text-gray-500" data-i18n="transaction">Transaction</span>
+            </div>
+        </a>
+        <a href="futures.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-file-contract text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="futures">Futures</span>
+        </a>
+        <a href="assets.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-wallet text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="assets">Assets</span>
+        </a>
+    </div>
+
+    <script src="translations.js"></script>
+    <script>
+        // Initialize Language
+        (function(){
+            const savedLang = localStorage.getItem('appLanguage') || 'English';
+            setLanguage(savedLang);
+        })();
+
+        const tabs = {
+            crypto: document.getElementById('tabCrypto'),
+            stock: document.getElementById('tabStock'),
+            forex: document.getElementById('tabForex'),
+            gold: document.getElementById('tabGold')
+        };
+
+        const lists = {
+            crypto: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "SOLUSDT", "ADAUSDT", "DOGEUSDT", "TRXUSDT", "LTCUSDT", "DOTUSDT", "LINKUSDT", "SHIBUSDT", "AVAXUSDT", "BCHUSDT", "UNIUSDT"],
+            stock: ["AAPL", "TSLA", "GOOGL", "AMZN", "MSFT", "NVDA", "META", "NFLX"],
+            forex: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD"],
+            gold: ["XAUUSD", "XAGUSD"]
+        };
+
+        const META = {
+            // Crypto
+            BTCUSDT: {sym: "BTC", img: "https://assets.coincap.io/assets/icons/btc@2x.png"},
+            ETHUSDT: {sym: "ETH", img: "https://assets.coincap.io/assets/icons/eth@2x.png"},
+            BNBUSDT: {sym: "BNB", img: "https://assets.coincap.io/assets/icons/bnb@2x.png"},
+            XRPUSDT: {sym: "XRP", img: "https://assets.coincap.io/assets/icons/xrp@2x.png"},
+            SOLUSDT: {sym: "SOL", img: "https://assets.coincap.io/assets/icons/sol@2x.png"},
+            ADAUSDT: {sym: "ADA", img: "https://assets.coincap.io/assets/icons/ada@2x.png"},
+            DOGEUSDT: {sym: "DOGE", img: "https://assets.coincap.io/assets/icons/doge@2x.png"},
+            TRXUSDT: {sym: "TRX", img: "https://assets.coincap.io/assets/icons/trx@2x.png"},
+            LTCUSDT: {sym: "LTC", img: "https://assets.coincap.io/assets/icons/ltc@2x.png"},
+            DOTUSDT: {sym: "DOT", img: "https://assets.coincap.io/assets/icons/dot@2x.png"},
+            LINKUSDT: {sym: "LINK", img: "https://assets.coincap.io/assets/icons/link@2x.png"},
+            SHIBUSDT: {sym: "SHIB", img: "https://assets.coincap.io/assets/icons/shib@2x.png"},
+            AVAXUSDT: {sym: "AVAX", img: "https://assets.coincap.io/assets/icons/avax@2x.png"},
+            BCHUSDT: {sym: "BCH", img: "https://assets.coincap.io/assets/icons/bch@2x.png"},
+            UNIUSDT: {sym: "UNI", img: "https://assets.coincap.io/assets/icons/uni@2x.png"},
+            // Stock
+            AAPL: {sym: "AAPL", bg: "#000000", icon: "fa-brands fa-apple"},
+            TSLA: {sym: "TSLA", bg: "#cc0000", text: "T"},
+            GOOGL: {sym: "GOOGL", bg: "#4285F4", icon: "fa-brands fa-google"},
+            AMZN: {sym: "AMZN", bg: "#FF9900", icon: "fa-brands fa-amazon"},
+            MSFT: {sym: "MSFT", bg: "#00A4EF", icon: "fa-brands fa-microsoft"},
+            NVDA: {sym: "NVDA", bg: "#76B900", text: "N"},
+            META: {sym: "META", bg: "#0668E1", icon: "fa-brands fa-meta"},
+            NFLX: {sym: "NFLX", bg: "#E50914", text: "N"},
+            // Forex
+            EURUSD: {sym: "EUR/USD", bg: "#003399", text: "€"},
+            GBPUSD: {sym: "GBP/USD", bg: "#C8102E", text: "£"},
+            USDJPY: {sym: "USD/JPY", bg: "#BC002D", text: "¥"},
+            AUDUSD: {sym: "AUD/USD", bg: "#00008B", text: "A$"},
+            USDCAD: {sym: "USD/CAD", bg: "#FF0000", text: "C$"},
+            // Gold
+            XAUUSD: {sym: "Gold", bg: "#FFD700", text: "G"},
+            XAGUSD: {sym: "Silver", bg: "#C0C0C0", text: "S"}
+        };
+
+        // Mock Data State
+        const mockState = {
+            AAPL: { price: 175.50, change: 1.2 },
+            TSLA: { price: 240.30, change: -0.5 },
+            GOOGL: { price: 138.20, change: 0.8 },
+            AMZN: { price: 129.40, change: 0.3 },
+            MSFT: { price: 320.10, change: 1.5 },
+            NVDA: { price: 460.90, change: 2.1 },
+            META: { price: 305.60, change: 0.9 },
+            NFLX: { price: 440.20, change: -1.1 },
+            EURUSD: { price: 1.0750, change: 0.05 },
+            GBPUSD: { price: 1.2530, change: -0.1 },
+            USDJPY: { price: 147.80, change: 0.2 },
+            AUDUSD: { price: 0.6420, change: 0.1 },
+            USDCAD: { price: 1.3650, change: -0.05 },
+            XAUUSD: { price: 1925.50, change: 0.4 },
+            XAGUSD: { price: 23.10, change: 0.6 }
+        };
+
+        let currentTab = "crypto";
+        let prices = new Map();
+
+        function setActive(tabKey) {
+            Object.entries(tabs).forEach(([key, el]) => {
+                if (!el) return;
+                if (key === tabKey) {
+                    el.classList.add("text-gray-900","border-b-2","border-yellow-custom");
+                    el.classList.remove("text-gray-500");
+                } else {
+                    el.classList.remove("text-gray-900","border-b-2","border-yellow-custom");
+                    el.classList.add("text-gray-500");
+                }
+            });
+            currentTab = tabKey;
+            refresh();
+        }
+
+        function updateMockData(category) {
+            const symbols = lists[category];
+            symbols.forEach(sym => {
+                const data = mockState[sym];
+                // Random walk
+                const move = (Math.random() - 0.5) * (data.price * 0.002); // 0.2% variance
+                data.price += move;
+                data.change += (Math.random() - 0.5) * 0.1;
+                
+                prices.set(sym, {
+                    symbol: sym,
+                    lastPrice: data.price,
+                    priceChangePercent: data.change,
+                    volume: Math.floor(Math.random() * 1000000)
+                });
+            });
+        }
+
+        async function fetchPrices(category) {
+            if (category === 'crypto') {
+                const symbols = lists.crypto;
+                try {
+                    const urlBackend = "/api/markets?symbols=" + encodeURIComponent(JSON.stringify(symbols));
+                    const res = await fetch(urlBackend);
+                    if (!res.ok) throw new Error("backend_failed");
+                    const json = await res.json();
+                    json.forEach(item => prices.set(item.symbol, item));
+                } catch (e) {
+                    // Fallback handled by previous state or silent fail
+                    console.log("Fetch failed", e);
+                }
+            } else {
+                updateMockData(category);
+            }
+        }
+
+        function renderList() {
+            const symbols = lists[currentTab];
+            const container = document.getElementById('quotesList');
+            const html = symbols.map(s => {
+                const meta = META[s] || {sym: s, bg:"#999", text:s[0]};
+                const data = prices.get(s) || {};
+                const last = data.lastPrice ? parseFloat(data.lastPrice) : 0;
+                const vol = data.volume ? parseFloat(data.volume) : 0;
+                const chg = data.priceChangePercent ? parseFloat(data.priceChangePercent) : 0;
+                
+                const chgColor = chg >= 0 ? "bg-green-custom" : "bg-red-500";
+                const chgSign = chg >= 0 ? "+" : "";
+                
+                // Format price based on magnitude
+                let lastStr = "0.00";
+                if (last > 0) {
+                    if (last < 1) lastStr = last.toFixed(4);
+                    else if (last < 10) lastStr = last.toFixed(3);
+                    else lastStr = last.toFixed(2);
+                }
+
+                const volStr = vol ? vol.toLocaleString(undefined,{maximumFractionDigits:0}) : "0";
+                
+                let iconHtml = '';
+                if (meta.img) {
+                    iconHtml = `<img src="${meta.img}" class="w-8 h-8 rounded-full mr-2" alt="${meta.sym}">`;
+                } else {
+                    const iconInner = meta.icon ? `<i class="${meta.icon}"></i>` : `${meta.text || meta.sym[0]}`;
+                    const bgClass = meta.bg && !meta.bg.startsWith('#') ? meta.bg : '';
+                    const bgStyle = meta.bg && meta.bg.startsWith('#') ? `style="background-color:${meta.bg}"` : '';
+                    iconHtml = `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white mr-2 text-xs font-bold ${bgClass}" ${bgStyle}>${iconInner}</div>`;
+                }
+
+                return `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center w-1/3">
+                        ${iconHtml}
+                        <div>
+                            <div class="flex items-baseline">
+                                <span class="font-bold text-gray-800 text-sm">${meta.sym}</span>
+                                ${currentTab === 'crypto' ? '<span class="text-xs text-gray-400 ml-1">/USDT</span>' : ''}
+                            </div>
+                            <div class="text-xs text-gray-400">${volStr}</div>
+                        </div>
+                    </div>
+                    <div class="w-1/3 text-center font-bold text-gray-800">
+                        ${lastStr}
+                    </div>
+                    <div class="w-1/3 flex justify-end">
+                        <div class="${chgColor} text-white px-3 py-1.5 rounded text-xs font-bold w-20 text-center">
+                            ${chgSign}${Math.abs(chg).toFixed(2)}%
+                        </div>
+                    </div>
+                </div>`;
+            }).join("");
+            container.innerHTML = html;
+        }
+
+        async function refresh() {
+            await fetchPrices(currentTab);
+            renderList();
+        }
+
+        tabs.crypto.addEventListener("click", () => setActive("crypto"));
+        tabs.stock.addEventListener("click", () => setActive("stock"));
+        tabs.forex.addEventListener("click", () => setActive("forex"));
+        tabs.gold.addEventListener("click", () => setActive("gold"));
+
+        setActive("crypto");
+        setInterval(refresh, 2000); // 2 seconds refresh for "live" feel
+    </script>
+</body>
+</html>

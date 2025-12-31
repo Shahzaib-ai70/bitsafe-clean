@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitsafe - Crypto Exchange</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8;
+        }
+        .text-green-custom {
+            color: #0ECB81;
+        }
+        .bg-green-custom {
+            background-color: #0ECB81;
+        }
+        .text-yellow-custom {
+            color: #F0B90B;
+        }
+        .bg-yellow-custom {
+            background-color: #ffb11a;
+        }
+        .bottom-nav-item.active {
+            color: #1f2937;
+        }
+        .bottom-nav-item {
+            color: #9ca3af;
+        }
+        /* Hide scrollbar for horizontal scroll areas */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="pb-20 max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-x-hidden text-gray-900 transition-colors duration-200">
+
+    <!-- Top Header -->
+    <div class="p-4 flex items-center justify-between sticky top-0 bg-white z-10 transition-colors duration-200">
+        <button id="gridMenuBtn" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3 shadow-sm hover:bg-gray-200 transition-colors" aria-label="Menu">
+            <i class="fa-solid fa-user text-gray-700 text-lg"></i>
+        </button>
+        <div class="flex items-center bg-gray-100 rounded-full px-3 py-2 flex-1 mr-4 transition-colors duration-200">
+            <i class="fa-solid fa-magnifying-glass text-gray-400 mr-2"></i>
+            <input type="text" placeholder="BTC/USDT" class="bg-transparent border-none outline-none text-sm w-full placeholder-gray-400">
+        </div>
+        <button id="csBtn" class="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+            <i class="fa-solid fa-headset text-xl text-gray-700"></i>
+            <span class="absolute top-2 right-2 bg-red-500 rounded-full w-2 h-2 border border-white"></span>
+        </button>
+    </div>
+
+    <!-- Balance Section -->
+    <div class="px-4 py-2">
+        <div class="flex items-center text-gray-500 text-sm mb-1">
+            <span data-i18n="est_total_value">Est.Total Value(USDT)</span>
+        </div>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 id="homeBalance" class="text-4xl font-bold text-gray-800 transition-colors duration-200">0.00</h1>
+                <div class="flex items-center text-gray-500 text-sm mt-1">
+                    <span id="homeBalanceUsd">≈ $0.00</span>
+                </div>
+                <div id="homeBalanceBreakdown" class="text-green-custom text-sm mt-1">0.00USDT(0%)</div>
+            </div>
+            <button id="toggleBalanceBtn" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+                <i id="toggleBalanceIcon" class="fa-regular fa-eye text-gray-800 text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="px-4 py-4 flex gap-4">
+        <button onclick="document.getElementById('depositModal').classList.remove('hidden')" class="flex-1 bg-yellow-custom text-gray-900 py-3 rounded-xl font-semibold flex items-center justify-center shadow-sm">
+            <i class="fa-solid fa-wallet mr-2"></i> <span data-i18n="deposit">Deposit</span>
+        </button>
+        <button onclick="document.getElementById('withdrawModal').classList.remove('hidden')" class="flex-1 bg-gray-100 text-gray-900 py-3 rounded-xl font-semibold flex items-center justify-center">
+            <i class="fa-solid fa-arrow-up-from-bracket mr-2"></i> <span data-i18n="withdraw">Withdraw</span>
+        </button>
+    </div>
+
+    <!-- Customer Service Modal -->
+    <div id="csModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative animate-scale-up mx-4">
+            <button id="closeCsBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-headset text-3xl text-blue-500"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800">Customer Support</h2>
+                <p class="text-gray-500 text-sm mt-1">We are here to help you 24/7</p>
+            </div>
+            
+            <div class="space-y-3">
+                <a href="https://wa.me/" target="_blank" class="flex items-center p-4 bg-green-50 border border-green-100 rounded-xl hover:bg-green-100 transition-colors group">
+                    <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white mr-4 shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-gray-800">WhatsApp</div>
+                        <div class="text-xs text-green-600">Chat now</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+                
+                <a href="https://t.me/" target="_blank" class="flex items-center p-4 bg-blue-50 border border-blue-100 rounded-xl hover:bg-blue-100 transition-colors group">
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white mr-4 shadow-sm group-hover:scale-110 transition-transform">
+                        <i class="fa-brands fa-telegram text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-bold text-gray-800">Telegram</div>
+                        <div class="text-xs text-blue-600">Join channel</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 ml-auto"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            
+            <h2 class="text-lg font-bold text-gray-800 mb-6">Select deposit method</h2>
+            
+            <a href="deposit_currency.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                <div class="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center text-white mr-4">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-800">Ordinary Deposit</div>
+                    <div class="text-xs text-gray-400">Transfer from wallet or exchange</div>
+                </div>
+            </a>
+
+            <!-- Close Modal Area -->
+            <button onclick="document.getElementById('depositModal').classList.add('hidden')" class="absolute top-0 right-0 p-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            
+            <h2 class="text-lg font-bold text-gray-800 mb-6">Select withdrawal method</h2>
+            
+            <a href="withdraw_currency.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                <div class="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-900 mr-4">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-800">Ordinary Withdraw</div>
+                    <div class="text-xs text-gray-400">Transfer from wallet or exchange</div>
+                </div>
+            </a>
+
+            <!-- Close Modal Area -->
+            <button onclick="document.getElementById('withdrawModal').classList.add('hidden')" class="absolute top-0 right-0 p-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+    <style>
+        @keyframes slide-up {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slide-up 0.3s ease-out;
+        }
+        @keyframes scale-up {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .animate-scale-up {
+            animation: scale-up 0.2s ease-out;
+        }
+    </style>
+
+    <!-- Primary Information Modal -->
+    <div id="primaryInfoModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            <h2 class="text-lg font-bold text-gray-800 mb-4">Primary Information</h2>
+            <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-500">First Name</label>
+                        <input id="piFirstName" type="text" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="John">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Last Name</label>
+                        <input id="piLastName" type="text" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="Doe">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500">Document Type</label>
+                    <select id="piDocType" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                        <option value="">Select</option>
+                        <option value="id_card">ID</option>
+                        <option value="passport">Passport</option>
+                        <option value="driving_licence">Driving Licence</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500">Document Number</label>
+                    <input id="piDocNumber" type="text" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="Enter number">
+                </div>
+                <div class="flex gap-3">
+                    <button id="piSubmitBtn" class="flex-1 bg-yellow-custom text-gray-900 py-2 rounded-xl font-semibold">Submit</button>
+                    <button onclick="document.getElementById('primaryInfoModal').classList.add('hidden')" class="flex-1 bg-gray-100 text-gray-900 py-2 rounded-xl font-semibold">Cancel</button>
+                </div>
+            </div>
+            <button onclick="document.getElementById('primaryInfoModal').classList.add('hidden')" class="absolute top-0 right-0 p-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Advanced Certification Modal -->
+    <div id="advancedCertModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            <h2 class="text-lg font-bold text-gray-800 mb-4">Advanced Certification</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-500">Document Type</label>
+                    <select id="acDocType" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                        <option value="">Select</option>
+                        <option value="id_card">ID</option>
+                        <option value="passport">Passport</option>
+                        <option value="driving_licence">Driving Licence</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-xs text-gray-500">Document Number</label>
+                    <input id="acDocNumber" type="text" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm" placeholder="Enter number">
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                    <div>
+                        <label class="text-xs text-gray-500">Upload Front</label>
+                        <input id="acFront" type="file" accept="image/*" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Upload Back</label>
+                        <input id="acBack" type="file" accept="image/*" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-500">Selfie Live</label>
+                        <input id="acSelfie" type="file" accept="image/*" class="mt-1 w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button id="acSubmitBtn" class="flex-1 bg-yellow-custom text-gray-900 py-2 rounded-xl font-semibold">Submit</button>
+                    <button onclick="document.getElementById('advancedCertModal').classList.add('hidden')" class="flex-1 bg-gray-100 text-gray-900 py-2 rounded-xl font-semibold">Cancel</button>
+                </div>
+            </div>
+            <button onclick="document.getElementById('advancedCertModal').classList.add('hidden')" class="absolute top-0 right-0 p-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Ticker Section -->
+    <div class="border-t border-b border-gray-100 py-3 px-4 flex justify-between overflow-x-auto no-scrollbar">
+        <div class="flex flex-col min-w-[30%]">
+            <span class="text-xs font-bold text-gray-800">BTC/USDT <span id="tickerBTCChange" class="text-green-custom">--</span></span>
+            <span id="tickerBTCPrice" class="text-lg font-bold text-green-custom">--</span>
+        </div>
+        <div class="flex flex-col min-w-[30%]">
+            <span class="text-xs font-bold text-gray-800">ETH/USDT <span id="tickerETHChange" class="text-green-custom">--</span></span>
+            <span id="tickerETHPrice" class="text-lg font-bold text-green-custom">--</span>
+        </div>
+        <div class="flex flex-col min-w-[30%]">
+            <span class="text-xs font-bold text-gray-800">XRP/USDT <span id="tickerXRPChange" class="text-green-custom">--</span></span>
+            <span id="tickerXRPPrice" class="text-lg font-bold text-green-custom">--</span>
+        </div>
+    </div>
+
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-4 gap-4 px-4 py-6">
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <i class="fa-solid fa-robot text-gray-800 text-xl"></i>
+            </div>
+            <span class="text-xs text-gray-600" data-i18n="ai_fi">AI-Fi</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <i class="fa-solid fa-download text-gray-800 text-xl"></i>
+            </div>
+            <span class="text-xs text-gray-600 text-center" data-i18n="app_download">APP Download</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <i class="fa-solid fa-circle-question text-gray-800 text-xl"></i>
+            </div>
+            <span class="text-xs text-gray-600" data-i18n="get_help">Get Help</span>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-2">
+                <i class="fa-solid fa-user-plus text-gray-800 text-xl"></i>
+            </div>
+            <span class="text-xs text-gray-600" data-i18n="referral">Referral</span>
+        </div>
+    </div>
+
+
+
+    <!-- Market Tabs -->
+    <div class="px-4">
+        <div class="flex space-x-6 text-gray-400 font-medium text-lg border-b border-gray-100 pb-2">
+            <div class="text-gray-900 border-b-2 border-yellow-custom pb-1" data-i18n="favorites">Favorites</div>
+            <div data-i18n="fast">Fast</div>
+            <div data-i18n="spot">Spot</div>
+            <div data-i18n="perpetual">Perpetual</div>
+        </div>
+        
+        <div class="flex space-x-6 mt-4 text-sm text-gray-500 font-medium">
+            <div id="tabCrypto" class="text-gray-900 border-b-2 border-yellow-custom pb-1 cursor-pointer" data-i18n="crypto">Crypto</div>
+            <div id="tabStock" class="cursor-pointer" data-i18n="stock">Stock</div>
+            <div id="tabForex" class="cursor-pointer" data-i18n="forex">Forex</div>
+            <div id="tabGold" class="cursor-pointer" data-i18n="gold">Gold</div>
+        </div>
+    </div>
+
+    <!-- List Header -->
+    <div class="flex justify-between px-4 mt-4 text-xs text-gray-400 mb-2">
+        <div class="w-1/3 text-left" data-i18n="name_volume">Name/Volume</div>
+        <div class="w-1/3 text-center" data-i18n="latest_price">Latest Price</div>
+        <div class="w-1/3 text-right" data-i18n="24h_chg">24h chg</div>
+    </div>
+
+    <!-- Crypto List -->
+    <div id="cryptoList" class="px-4 space-y-6 pb-4">
+        <div class="text-center text-gray-400 py-4" data-i18n="loading_market_data">Loading market data...</div>
+    </div>
+
+    <!-- Profile Menu Overlay -->
+    <div id="profileMenu" class="hidden fixed inset-0 z-40 bg-white transition-colors duration-200">
+        <div class="p-4 flex items-center justify-between border-b">
+            <button id="menuBackBtn" class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors">
+                <i class="fa-solid fa-arrow-left text-gray-700"></i>
+            </button>
+            <div class="relative">
+                <i class="fa-solid fa-headset text-xl text-gray-700 dark:text-gray-300"></i>
+            </div>
+        </div>
+        <div class="p-4">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center">
+                    <i class="fa-solid fa-user text-yellow-700"></i>
+                </div>
+                <div>
+                    <div id="menuUserName" class="font-semibold text-gray-800 dark:text-white">Guest</div>
+                    <div id="menuUserId" class="text-xs text-gray-400">ID: —</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <button id="btnPrimaryInfo" class="border dark:border-gray-700 rounded-xl p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="font-semibold text-gray-800 dark:text-gray-200 mb-1" data-i18n="primary_information">Primary Information</div>
+                    <div id="primaryStatus" class="text-xs text-gray-400" data-i18n="review">Review</div>
+                </button>
+                <button id="btnAdvancedCert" class="border dark:border-gray-700 rounded-xl p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <div class="font-semibold text-gray-800 dark:text-gray-200 mb-1" data-i18n="advanced_certification">Advanced Certification</div>
+                    <div id="advancedStatus" class="text-xs text-gray-400" data-i18n="kyc">KYC</div>
+                </button>
+            </div>
+            <div class="space-y-1">
+                <a href="history.html?tab=deposit" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <span class="text-gray-800 dark:text-gray-200" data-i18n="deposit_history">Deposit History</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+                <a href="history.html?tab=withdraw" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <span class="text-gray-800 dark:text-gray-200" data-i18n="withdraw_history">Withdraw History</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+                <a href="history.html?tab=trade" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <span class="text-gray-800 dark:text-gray-200" data-i18n="trade_history">Trade History</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+                <div onclick="openLanguageModal()" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer transition-colors">
+                    <span class="text-gray-800 dark:text-gray-200" data-i18n="language">Language</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-gray-400" id="currentLangDisplay">English</span>
+                        <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                    </div>
+                </div>
+                <a href="#" onclick="document.getElementById('teamModal').classList.remove('hidden')" class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                    <span class="text-gray-800 dark:text-gray-200" data-i18n="team">Team</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+                <a href="#" class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                    <span class="text-gray-800" data-i18n="address">Address</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+                <a href="#" class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                    <span class="text-gray-800" data-i18n="company_profile">Company Profile</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+                <a href="#" class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                    <span class="text-gray-800" data-i18n="regulatory_license">Regulatory License</span>
+                    <i class="fa-solid fa-chevron-right text-gray-400"></i>
+                </a>
+            </div>
+        </div>
+        <div class="p-4">
+            <button id="logoutBtn" class="w-full py-3 border rounded-xl text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors" data-i18n="log_out">Log Out</button>
+        </div>
+    </div>
+
+    <!-- Team Modal -->
+    <div id="teamModal" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl p-6 relative animate-scale-up mx-4 transition-colors duration-200">
+            <button onclick="document.getElementById('teamModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-users text-3xl text-yellow-600 dark:text-yellow-400"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-white">My Team</h2>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Team Overview</p>
+            </div>
+            
+            <div class="text-center py-8">
+                <div class="text-4xl font-bold text-gray-800 dark:text-white mb-2">0</div>
+                <div class="text-gray-500 dark:text-gray-400">Total Team Members</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Modal -->
+    <div id="languageModal" class="hidden fixed inset-0 z-[60] flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative h-[80vh] flex flex-col animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6 flex-shrink-0"></div>
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex-shrink-0" data-i18n="select_language">Select Language</h2>
+            <div class="overflow-y-auto flex-1 space-y-2 pr-2" id="languageList">
+                <!-- Languages injected by JS -->
+            </div>
+            <button onclick="document.getElementById('languageModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+
+
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-6 flex justify-between items-center z-20 max-w-md mx-auto">
+        <div class="flex flex-col items-center bottom-nav-item active text-gray-900 cursor-pointer">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="home_page">Home Page</span>
+        </div>
+        <a href="quotes.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-chart-simple text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="quotes">Quotes</span>
+        </a>
+        <a href="transaction.html" class="relative -top-5">
+            <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                <i class="fa-solid fa-arrow-right-arrow-left text-white text-lg transform rotate-45"></i>
+            </div>
+            <div class="text-center mt-1">
+                <span class="text-[10px] text-gray-500" data-i18n="transaction">Transaction</span>
+            </div>
+        </a>
+        <a href="futures.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-file-contract text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="futures">Futures</span>
+        </a>
+        <a href="#" onclick="handleAssetsClick(event)" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-wallet text-xl mb-1"></i>
+            <span class="text-[10px]" data-i18n="assets">Assets</span>
+        </a>
+    </div>
+
+    <script src="translations.js"></script>
+    <script>
+        function isLoggedIn() {
+            return !!localStorage.getItem('authUser');
+        }
+        function handleAssetsClick(e) {
+            e.preventDefault();
+            if (!isLoggedIn()) {
+                window.location.href = 'register.html';
+            } else {
+                window.location.href = 'assets.html';
+            }
+        }
+        
+        // Initialize Language
+        (function(){
+            const savedLang = localStorage.getItem('appLanguage') || 'English';
+            setLanguage(savedLang);
+            const currentLangDisplay = document.getElementById('currentLangDisplay');
+            if(currentLangDisplay) currentLangDisplay.textContent = savedLang;
+        })();
+
+        // Fetch balance for home page
+        (function(){
+            const u = localStorage.getItem('authUser');
+            if(u) {
+                fetch('/api/me', { headers: { 'x-user': u } })
+                .then(r=>r.json())
+                .then(d=>{
+                    if(d && d.balance !== undefined) {
+                        window.__lastBalance = d.balance;
+                        renderBalance();
+                    }
+                })
+                .catch(console.error);
+            } else {
+                window.__lastBalance = 0;
+                renderBalance();
+            }
+        })();
+
+        const gridBtn = document.getElementById('gridMenuBtn');
+        const menuEl = document.getElementById('profileMenu');
+        const menuBackBtn = document.getElementById('menuBackBtn');
+        const userNameEl = document.getElementById('menuUserName');
+        const userIdEl = document.getElementById('menuUserId');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const toggleBalanceBtn = document.getElementById('toggleBalanceBtn');
+        const toggleBalanceIcon = document.getElementById('toggleBalanceIcon');
+        let balanceHidden = localStorage.getItem('hideBalance') === '1';
+        function renderBalance() {
+            const bal = (window.__lastBalance || 0).toFixed(2);
+            const homeBal = document.getElementById('homeBalance');
+            const homeUsd = document.getElementById('homeBalanceUsd');
+            const homeBreak = document.getElementById('homeBalanceBreakdown');
+            if(balanceHidden) {
+                if(homeBal) homeBal.textContent = '****';
+                if(homeUsd) homeUsd.textContent = '≈ $****';
+                if(homeBreak) homeBreak.textContent = '****';
+                if(toggleBalanceIcon) toggleBalanceIcon.className = 'fa-regular fa-eye-slash text-gray-800 text-xl';
+            } else {
+                if(homeBal) homeBal.textContent = bal;
+                if(homeUsd) homeUsd.textContent = '≈ $' + bal;
+                if(homeBreak) homeBreak.textContent = bal + 'USDT(0%)';
+                if(toggleBalanceIcon) toggleBalanceIcon.className = 'fa-regular fa-eye text-gray-800 text-xl';
+            }
+        }
+        toggleBalanceBtn?.addEventListener('click', function(){
+            balanceHidden = !balanceHidden;
+            localStorage.setItem('hideBalance', balanceHidden ? '1' : '0');
+            renderBalance();
+        });
+        
+        // Customer Service Modal Logic
+        const csBtn = document.getElementById('csBtn');
+        const csModal = document.getElementById('csModal');
+        const closeCsBtn = document.getElementById('closeCsBtn');
+        
+        csBtn?.addEventListener('click', () => {
+            csModal.classList.remove('hidden');
+        });
+        
+        closeCsBtn?.addEventListener('click', () => {
+            csModal.classList.add('hidden');
+        });
+        
+        csModal?.addEventListener('click', (e) => {
+            if(e.target === csModal) {
+                csModal.classList.add('hidden');
+            }
+        });
+
+        gridBtn?.addEventListener('click', function () {
+            const u = localStorage.getItem('authUser');
+            userNameEl.textContent = u ? u : 'Guest';
+            menuEl.classList.remove('hidden');
+            if(u) {
+                fetch('/api/me', { headers: { 'x-user': u } })
+                .then(r=>r.json())
+                .then(d=>{
+                    if(d && d.username) {
+                         userNameEl.textContent = d.username;
+                         if(typeof d.id !== 'undefined') {
+                             userIdEl.textContent = 'ID: #' + d.id;
+                         }
+                    }
+                })
+                .catch(console.error);
+                fetch('/api/verification/status', { headers: { 'x-user': u } })
+                .then(r=>r.json())
+                .then(s=>{
+                    primaryState = s.primary || null;
+                    advancedState = s.advanced || null;
+                    renderVerificationUI();
+                })
+                .catch(()=>{});
+            }
+        });
+        menuBackBtn?.addEventListener('click', function () {
+            menuEl.classList.add('hidden');
+        });
+        logoutBtn?.addEventListener('click', function () {
+             fetch('/api/logout', { method: 'POST' })
+             .finally(() => {
+                 localStorage.removeItem('authUser'); 
+                 window.location.href='login.html'; 
+             });
+        });
+        const btnPrimaryInfo = document.getElementById('btnPrimaryInfo');
+        const btnAdvancedCert = document.getElementById('btnAdvancedCert');
+        const primaryInfoModal = document.getElementById('primaryInfoModal');
+        const advancedCertModal = document.getElementById('advancedCertModal');
+        const piSubmitBtn = document.getElementById('piSubmitBtn');
+        const acSubmitBtn = document.getElementById('acSubmitBtn');
+        let primaryState = null;
+        let advancedState = null;
+        function renderVerificationUI() {
+            const ps = document.getElementById('primaryStatus');
+            const as = document.getElementById('advancedStatus');
+            if(primaryState === 'approved') {
+                btnPrimaryInfo.className = 'border rounded-xl p-4 text-left bg-green-50 border-green-200';
+                ps.innerHTML = '<span class=\"text-green-600 font-medium\"><i class=\"fa-solid fa-check mr-1\"></i>approved</span>';
+            } else if(primaryState === 'pending') {
+                btnPrimaryInfo.className = 'border rounded-xl p-4 text-left hover:bg-yellow-50 border-yellow-200';
+                ps.innerHTML = '<span class=\"text-yellow-600 font-medium\"><i class=\"fa-solid fa-clock mr-1\"></i>pending</span>';
+            } else {
+                btnPrimaryInfo.className = 'border rounded-xl p-4 text-left hover:bg-gray-50';
+                ps.textContent = 'Review';
+            }
+            if(advancedState === 'approved') {
+                btnAdvancedCert.className = 'border rounded-xl p-4 text-left bg-green-50 border-green-200';
+                as.innerHTML = '<span class=\"text-green-600 font-medium\"><i class=\"fa-solid fa-check mr-1\"></i>approved</span>';
+            } else if(advancedState === 'pending') {
+                btnAdvancedCert.className = 'border rounded-xl p-4 text-left hover:bg-yellow-50 border-yellow-200';
+                as.innerHTML = '<span class=\"text-yellow-600 font-medium\"><i class=\"fa-solid fa-clock mr-1\"></i>pending</span>';
+            } else {
+                btnAdvancedCert.className = 'border rounded-xl p-4 text-left hover:bg-gray-50';
+                as.textContent = 'KYC';
+            }
+        }
+        function canOpenPrimary() {
+            return primaryState !== 'approved' || advancedState !== 'approved';
+        }
+        function canOpenAdvanced() {
+            if(primaryState !== 'approved') {
+                alert('First complete Primary Information');
+                return false;
+            }
+            return advancedState !== 'approved' || primaryState !== 'approved';
+        }
+        btnPrimaryInfo?.addEventListener('click', ()=>{
+            if(!canOpenPrimary()) return;
+            primaryInfoModal.classList.remove('hidden');
+        });
+
+        // Language Logic
+        const languages = [
+            "English", "Español", "Français", "Deutsch", "Italiano", "Português", "Русский", "中文 (Simplified)", "中文 (Traditional)", "日本語", "한국어", "Tiếng Việt", "Indonesian", "Türkçe", "العربية", "हिन्दी", "Polski", "Nederlands", "Svenska", "Norsk", "Dansk", "Suomi", "Čeština", "Magyar", "Română", "Ελληνικά", "Українська"
+        ];
+        
+        function openLanguageModal() {
+            const list = document.getElementById('languageList');
+            const currentLang = localStorage.getItem('appLanguage') || 'English';
+            
+            list.innerHTML = ''; // Rebuild list to show correct checkmark
+            
+            languages.forEach(lang => {
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left p-3 hover:bg-gray-50 rounded-lg flex justify-between items-center group";
+                const isSelected = lang === currentLang;
+                btn.innerHTML = `
+                    <span class="text-gray-700 group-hover:text-gray-900 font-medium">${lang}</span>
+                    ${isSelected ? '<i class="fa-solid fa-check text-yellow-500"></i>' : ''}
+                `;
+                btn.onclick = () => {
+                    setLanguage(lang);
+                    const currentLangDisplay = document.getElementById('currentLangDisplay');
+                    if(currentLangDisplay) currentLangDisplay.textContent = lang;
+                    document.getElementById('languageModal').classList.add('hidden');
+                };
+                list.appendChild(btn);
+            });
+            document.getElementById('languageModal').classList.remove('hidden');
+        }
+
+
+
+        btnAdvancedCert?.addEventListener('click', ()=>{
+            if(!canOpenAdvanced()) return;
+            advancedCertModal.classList.remove('hidden');
+        });
+        piSubmitBtn?.addEventListener('click', async ()=>{
+            const u = localStorage.getItem('authUser');
+            if(!u) { alert('Please login first'); return; }
+            const first_name = document.getElementById('piFirstName').value.trim();
+            const last_name = document.getElementById('piLastName').value.trim();
+            const document_type = document.getElementById('piDocType').value.trim();
+            const document_number = document.getElementById('piDocNumber').value.trim();
+            if(!first_name || !last_name || !document_type || !document_number) { alert('Fill all fields'); return; }
+            try {
+              const r = await fetch('http://localhost:3001/api/verification/primary', {
+                 method: 'POST',
+                 headers: { 'Content-Type': 'application/json', 'x-user': u },
+                 body: JSON.stringify({ first_name, last_name, document_type, document_number })
+              });
+              const j = await r.json();
+              if(r.ok) {
+                primaryState = 'pending';
+                renderVerificationUI();
+                primaryInfoModal.classList.add('hidden');
+              } else {
+                alert(j.error || 'Submit failed');
+              }
+            } catch(e) { alert(e.message); }
+        });
+        acSubmitBtn?.addEventListener('click', async ()=>{
+            const u = localStorage.getItem('authUser');
+            if(!u) { alert('Please login first'); return; }
+            const document_type = document.getElementById('acDocType').value.trim();
+            const document_number = document.getElementById('acDocNumber').value.trim();
+            const front = document.getElementById('acFront').files[0];
+            const back = document.getElementById('acBack').files[0];
+            const selfie = document.getElementById('acSelfie').files[0];
+            if(!document_type || !document_number || !front || !back || !selfie) { alert('Fill all fields'); return; }
+            const fd = new FormData();
+            fd.append('document_type', document_type);
+            fd.append('document_number', document_number);
+            fd.append('front', front);
+            fd.append('back', back);
+            fd.append('selfie', selfie);
+            try {
+              const r = await fetch('http://localhost:3001/api/verification/advanced', {
+                 method: 'POST',
+                 headers: { 'x-user': u },
+                 body: fd
+              });
+              const j = await r.json();
+              if(r.ok) {
+                advancedState = 'pending';
+                renderVerificationUI();
+                advancedCertModal.classList.add('hidden');
+              } else {
+                alert(j.error || 'Submit failed');
+              }
+            } catch(e) { alert(e.message); }
+        });
+    </script>
+    <script>
+        // --- Market Data Logic ---
+        const tabs = {
+            crypto: document.getElementById('tabCrypto'),
+            stock: document.getElementById('tabStock'),
+            forex: document.getElementById('tabForex'),
+            gold: document.getElementById('tabGold')
+        };
+
+        const lists = {
+            crypto: ["BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "SOLUSDT", "ADAUSDT", "DOGEUSDT", "TRXUSDT", "LTCUSDT", "DOTUSDT", "LINKUSDT", "SHIBUSDT", "AVAXUSDT", "BCHUSDT", "UNIUSDT"],
+            stock: ["AAPL", "TSLA", "GOOGL", "AMZN", "MSFT", "NVDA", "META", "NFLX"],
+            forex: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD"],
+            gold: ["XAUUSD", "XAGUSD"]
+        };
+
+        const META = {
+            // Crypto
+            BTCUSDT: {sym: "BTC", img: "https://assets.coincap.io/assets/icons/btc@2x.png"},
+            ETHUSDT: {sym: "ETH", img: "https://assets.coincap.io/assets/icons/eth@2x.png"},
+            BNBUSDT: {sym: "BNB", img: "https://assets.coincap.io/assets/icons/bnb@2x.png"},
+            XRPUSDT: {sym: "XRP", img: "https://assets.coincap.io/assets/icons/xrp@2x.png"},
+            SOLUSDT: {sym: "SOL", img: "https://assets.coincap.io/assets/icons/sol@2x.png"},
+            ADAUSDT: {sym: "ADA", img: "https://assets.coincap.io/assets/icons/ada@2x.png"},
+            DOGEUSDT: {sym: "DOGE", img: "https://assets.coincap.io/assets/icons/doge@2x.png"},
+            TRXUSDT: {sym: "TRX", img: "https://assets.coincap.io/assets/icons/trx@2x.png"},
+            LTCUSDT: {sym: "LTC", img: "https://assets.coincap.io/assets/icons/ltc@2x.png"},
+            DOTUSDT: {sym: "DOT", img: "https://assets.coincap.io/assets/icons/dot@2x.png"},
+            LINKUSDT: {sym: "LINK", img: "https://assets.coincap.io/assets/icons/link@2x.png"},
+            SHIBUSDT: {sym: "SHIB", img: "https://assets.coincap.io/assets/icons/shib@2x.png"},
+            AVAXUSDT: {sym: "AVAX", img: "https://assets.coincap.io/assets/icons/avax@2x.png"},
+            BCHUSDT: {sym: "BCH", img: "https://assets.coincap.io/assets/icons/bch@2x.png"},
+            UNIUSDT: {sym: "UNI", img: "https://assets.coincap.io/assets/icons/uni@2x.png"},
+            // Stock
+            AAPL: {sym: "AAPL", bg: "#000000", icon: "fa-brands fa-apple"},
+            TSLA: {sym: "TSLA", bg: "#cc0000", text: "T"},
+            GOOGL: {sym: "GOOGL", bg: "#4285F4", icon: "fa-brands fa-google"},
+            AMZN: {sym: "AMZN", bg: "#FF9900", icon: "fa-brands fa-amazon"},
+            MSFT: {sym: "MSFT", bg: "#00A4EF", icon: "fa-brands fa-microsoft"},
+            NVDA: {sym: "NVDA", bg: "#76B900", text: "N"},
+            META: {sym: "META", bg: "#0668E1", icon: "fa-brands fa-meta"},
+            NFLX: {sym: "NFLX", bg: "#E50914", text: "N"},
+            // Forex
+            EURUSD: {sym: "EUR/USD", bg: "#003399", text: "€"},
+            GBPUSD: {sym: "GBP/USD", bg: "#C8102E", text: "£"},
+            USDJPY: {sym: "USD/JPY", bg: "#BC002D", text: "¥"},
+            AUDUSD: {sym: "AUD/USD", bg: "#00008B", text: "A$"},
+            USDCAD: {sym: "USD/CAD", bg: "#FF0000", text: "C$"},
+            // Gold
+            XAUUSD: {sym: "Gold", bg: "#FFD700", text: "G"},
+            XAGUSD: {sym: "Silver", bg: "#C0C0C0", text: "S"}
+        };
+
+        // Mock Data State
+        const mockState = {
+            AAPL: { price: 175.50, change: 1.2 },
+            TSLA: { price: 240.30, change: -0.5 },
+            GOOGL: { price: 138.20, change: 0.8 },
+            AMZN: { price: 129.40, change: 0.3 },
+            MSFT: { price: 320.10, change: 1.5 },
+            NVDA: { price: 460.90, change: 2.1 },
+            META: { price: 305.60, change: 0.9 },
+            NFLX: { price: 440.20, change: -1.1 },
+            EURUSD: { price: 1.0750, change: 0.05 },
+            GBPUSD: { price: 1.2530, change: -0.1 },
+            USDJPY: { price: 147.80, change: 0.2 },
+            AUDUSD: { price: 0.6420, change: 0.1 },
+            USDCAD: { price: 1.3650, change: -0.05 },
+            XAUUSD: { price: 1925.50, change: 0.4 },
+            XAGUSD: { price: 23.10, change: 0.6 }
+        };
+
+        let currentTab = "crypto";
+        let prices = new Map();
+
+        // Tab Event Listeners
+        Object.entries(tabs).forEach(([key, el]) => {
+            if(el) {
+                el.addEventListener('click', () => {
+                    setActive(key);
+                });
+            }
+        });
+
+        function setActive(tabKey) {
+            Object.entries(tabs).forEach(([key, el]) => {
+                if (!el) return;
+                if (key === tabKey) {
+                    el.classList.add("text-gray-900","border-b-2","border-yellow-custom");
+                    el.classList.remove("text-gray-500"); // Note: original HTML has text-gray-500 in parent but inline class might need adjustment
+                    // Actually the parent has text-gray-500, so we just toggle active classes
+                } else {
+                    el.classList.remove("text-gray-900","border-b-2","border-yellow-custom");
+                    // el.classList.add("text-gray-500");
+                }
+            });
+            currentTab = tabKey;
+            refresh();
+        }
+
+        function updateMockData(category) {
+            const symbols = lists[category];
+            if(!symbols) return;
+            symbols.forEach(sym => {
+                const data = mockState[sym];
+                if(!data) return;
+                // Random walk
+                const move = (Math.random() - 0.5) * (data.price * 0.002); // 0.2% variance
+                data.price += move;
+                data.change += (Math.random() - 0.5) * 0.1;
+                
+                prices.set(sym, {
+                    symbol: sym,
+                    lastPrice: data.price,
+                    priceChangePercent: data.change,
+                    volume: Math.floor(Math.random() * 1000000)
+                });
+            });
+        }
+
+        async function fetchPrices(category) {
+            if (category === 'crypto') {
+                const symbols = lists.crypto;
+                try {
+                    const urlBackend = "/api/markets?symbols=" + encodeURIComponent(JSON.stringify(symbols));
+                    const res = await fetch(urlBackend);
+                    if (!res.ok) throw new Error("backend_failed");
+                    const json = await res.json();
+                    json.forEach(item => prices.set(item.symbol, item));
+                    
+                    // Also update Ticker if we have data
+                    updateTicker(json);
+                    
+                } catch (e) {
+                    console.log("Fetch failed", e);
+                }
+            } else {
+                updateMockData(category);
+            }
+        }
+
+        function updateTicker(data) {
+            const btc = data.find(d => d.symbol === "BTCUSDT") || prices.get("BTCUSDT");
+            const eth = data.find(d => d.symbol === "ETHUSDT") || prices.get("ETHUSDT");
+            const xrp = data.find(d => d.symbol === "XRPUSDT") || prices.get("XRPUSDT");
+
+            if (btc) updateTickerItem("tickerBTC", btc);
+            if (eth) updateTickerItem("tickerETH", eth);
+            if (xrp) updateTickerItem("tickerXRP", xrp);
+        }
+
+        function updateTickerItem(idPrefix, data) {
+            const priceEl = document.getElementById(`${idPrefix}Price`);
+            const changeEl = document.getElementById(`${idPrefix}Change`);
+            
+            if (priceEl && changeEl) {
+                const price = parseFloat(data.lastPrice);
+                priceEl.textContent = price.toFixed(price < 10 ? 4 : 2);
+                const change = parseFloat(data.priceChangePercent);
+                changeEl.textContent = (change >= 0 ? "+" : "") + change.toFixed(2) + "%";
+                
+                // Update colors
+                const colorClass = change >= 0 ? "text-green-custom" : "text-red-500";
+                priceEl.className = `text-lg font-bold ${colorClass}`;
+                changeEl.className = colorClass;
+            }
+        }
+
+        function renderList() {
+            const symbols = lists[currentTab];
+            const container = document.getElementById('cryptoList');
+            if (!container) return;
+
+            const html = symbols.map(s => {
+                const meta = META[s] || {sym: s.replace("USDT",""), bg:"#999", text:s[0]};
+                const data = prices.get(s) || {};
+                const last = data.lastPrice ? parseFloat(data.lastPrice) : 0;
+                const vol = data.volume ? parseFloat(data.volume) : 0;
+                const chg = data.priceChangePercent ? parseFloat(data.priceChangePercent) : 0;
+                
+                const chgColor = chg >= 0 ? "bg-green-custom" : "bg-red-500";
+                const chgSign = chg >= 0 ? "+" : "";
+                
+                // Format price based on magnitude
+                let lastStr = "0.00";
+                if (last > 0) {
+                    if (last < 1) lastStr = last.toFixed(4);
+                    else if (last < 10) lastStr = last.toFixed(3);
+                    else lastStr = last.toFixed(2);
+                }
+
+                // Format volume
+                let volStr = vol.toFixed(0);
+                if (vol > 1000000) volStr = (vol / 1000000).toFixed(2) + "M";
+                else if (vol > 1000) volStr = (vol / 1000).toFixed(2) + "K";
+                
+                let iconHtml = '';
+                if (meta.img) {
+                    iconHtml = `<img src="${meta.img}" class="w-8 h-8 rounded-full mr-2" alt="${meta.sym}">`;
+                } else {
+                    const iconInner = meta.icon ? `<i class="${meta.icon}"></i>` : `${meta.text || meta.sym[0]}`;
+                    const bgClass = meta.bg && !meta.bg.startsWith('#') ? meta.bg : '';
+                    const bgStyle = meta.bg && meta.bg.startsWith('#') ? `style="background-color:${meta.bg}"` : '';
+                    iconHtml = `<div class="w-8 h-8 rounded-full flex items-center justify-center text-white mr-2 text-xs font-bold ${bgClass}" ${bgStyle}>${iconInner}</div>`;
+                }
+
+                return `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center w-1/3">
+                        ${iconHtml}
+                        <div>
+                            <div class="flex items-baseline">
+                                <span class="font-bold text-gray-800 text-sm">${meta.sym}</span>
+                                ${currentTab === 'crypto' ? '<span class="text-xs text-gray-400 ml-1">/USDT</span>' : ''}
+                            </div>
+                            <div class="text-xs text-gray-400">${volStr}</div>
+                        </div>
+                    </div>
+                    <div class="w-1/3 text-center font-bold text-gray-800">
+                        ${lastStr}
+                    </div>
+                    <div class="w-1/3 flex justify-end">
+                        <div class="${chgColor} text-white px-3 py-1.5 rounded text-xs font-bold w-20 text-center">
+                            ${chgSign}${Math.abs(chg).toFixed(2)}%
+                        </div>
+                    </div>
+                </div>`;
+            }).join("");
+            container.innerHTML = html;
+        }
+
+        // Initial fetch and interval
+        refresh();
+        setInterval(refresh, 3000);
+    </script>
+</body>
+</html>

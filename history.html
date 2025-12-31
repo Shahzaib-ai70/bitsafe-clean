@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitsafe - History</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+        .text-green-custom { color: #0ECB81; }
+        .text-red-custom { color: #F6465D; }
+        .bg-yellow-custom { background-color: #F0B90B; }
+    </style>
+</head>
+<body class="max-w-md mx-auto bg-white min-h-screen">
+    
+    <!-- Header -->
+    <div class="sticky top-0 bg-white z-10 border-b border-gray-100">
+        <div class="flex items-center p-4">
+            <a href="assets.html" class="mr-4">
+                <i class="fa-solid fa-arrow-left text-gray-700 text-lg"></i>
+            </a>
+            <h1 class="text-lg font-bold text-gray-800">History</h1>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-100">
+            <button onclick="switchTab('deposit')" id="tab-deposit" class="flex-1 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent relative">
+                Deposit
+            </button>
+            <button onclick="switchTab('withdraw')" id="tab-withdraw" class="flex-1 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent relative">
+                Withdraw
+            </button>
+            <button onclick="switchTab('trade')" id="tab-trade" class="flex-1 py-3 text-sm font-medium text-gray-500 border-b-2 border-transparent relative">
+                Trade
+            </button>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-4 pb-20">
+        
+        <!-- Trade Stats (Only visible on Trade tab) -->
+        <div id="tradeStats" class="hidden mb-6 bg-gray-50 rounded-xl p-4 grid grid-cols-2 gap-4">
+            <div>
+                <div class="text-xs text-gray-400 mb-1">Total Trades</div>
+                <div class="text-xl font-bold text-gray-800" id="statTotal">0</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">Win Rate</div>
+                <div class="text-xl font-bold text-gray-800" id="statWinRate">0%</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">Total Profit</div>
+                <div class="text-base font-bold text-green-custom" id="statProfit">+0.00</div>
+            </div>
+            <div>
+                <div class="text-xs text-gray-400 mb-1">Total Loss</div>
+                <div class="text-base font-bold text-red-custom" id="statLoss">-0.00</div>
+            </div>
+        </div>
+
+        <div id="listContainer" class="space-y-4">
+            <!-- Dynamic Content -->
+            <div class="flex justify-center py-10">
+                <i class="fa-solid fa-circle-notch fa-spin text-gray-300 text-2xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'deposit';
+
+        (function() {
+            if (!localStorage.getItem('authUser')) {
+                window.location.replace('login.html');
+                return;
+            }
+            
+            // Get tab from URL
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            if(tab && ['deposit', 'withdraw', 'trade'].includes(tab)) {
+                currentTab = tab;
+            }
+            
+            switchTab(currentTab);
+        })();
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // UI Updates
+            ['deposit', 'withdraw', 'trade'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if(t === tab) {
+                    el.classList.add('text-gray-900', 'border-yellow-500');
+                    el.classList.remove('text-gray-500', 'border-transparent');
+                } else {
+                    el.classList.remove('text-gray-900', 'border-yellow-500');
+                    el.classList.add('text-gray-500', 'border-transparent');
+                }
+            });
+
+            // Show/Hide Stats
+            const stats = document.getElementById('tradeStats');
+            if(tab === 'trade') stats.classList.remove('hidden');
+            else stats.classList.add('hidden');
+
+            fetchData(tab);
+        }
+
+        async function fetchData(type) {
+            const list = document.getElementById('listContainer');
+            list.innerHTML = '<div class="flex justify-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-gray-300 text-2xl"></i></div>';
+            
+            const u = localStorage.getItem('authUser');
+            let endpoint = '';
+            if(type === 'deposit') endpoint = '/api/history/deposits';
+            else if(type === 'withdraw') endpoint = '/api/history/withdrawals';
+            else if(type === 'trade') endpoint = '/api/history/trades';
+
+            try {
+                const res = await fetch(endpoint, {
+                    headers: { 'x-user': u }
+                });
+                const data = await res.json();
+                
+                if(data.error) {
+                    list.innerHTML = `<div class="text-center text-gray-400 py-10">${data.error}</div>`;
+                    return;
+                }
+
+                if(data.length === 0) {
+                    list.innerHTML = `<div class="text-center text-gray-400 py-10">No records found</div>`;
+                    if(type === 'trade') updateTradeStats([]);
+                    return;
+                }
+
+                if(type === 'trade') updateTradeStats(data);
+                renderList(type, data);
+
+            } catch(e) {
+                console.error(e);
+                list.innerHTML = `<div class="text-center text-red-400 py-10">Failed to load data</div>`;
+            }
+        }
+
+        function renderList(type, data) {
+            const list = document.getElementById('listContainer');
+            list.innerHTML = '';
+
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'bg-white border border-gray-100 rounded-xl p-4 shadow-sm';
+                
+                const date = new Date(item.created_at).toLocaleString();
+                
+                if(type === 'deposit' || type === 'withdraw') {
+                    const isDeposit = type === 'deposit';
+                    const statusColor = item.status === 'approved' ? 'text-green-500' : (item.status === 'rejected' ? 'text-red-500' : 'text-yellow-500');
+                    
+                    div.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="font-bold text-gray-800">${item.currency} <span class="text-xs font-normal text-gray-500">${item.network}</span></div>
+                                <div class="text-xs text-gray-400">${date}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-gray-800 text-lg">${parseFloat(item.amount).toFixed(4)}</div>
+                                <div class="text-xs font-medium capitalize ${statusColor}">${item.status}</div>
+                            </div>
+                        </div>
+                        ${isDeposit && item.proof_image ? `<a href="${item.proof_image}" target="_blank" class="text-xs text-blue-500 hover:underline">View Proof</a>` : ''}
+                    `;
+                } else if(type === 'trade') {
+                    // Trade Item
+                    const isWin = item.result === 'win';
+                    const profitClass = isWin ? 'text-green-custom' : 'text-red-custom';
+                    const profitSign = isWin ? '+' : '';
+                    
+                    div.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-800">${item.symbol}</span>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded ${item.side === 'long' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'} uppercase">${item.side}</span>
+                            </div>
+                            <div class="text-xs text-gray-400">${date}</div>
+                        </div>
+                        <div class="flex justify-between items-end">
+                            <div>
+                                <div class="text-xs text-gray-400">Amount</div>
+                                <div class="font-medium text-gray-800">${parseFloat(item.amount).toFixed(2)}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-400">Profit</div>
+                                <div class="font-bold ${profitClass} text-lg">${profitSign}${parseFloat(item.profit).toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                list.appendChild(div);
+            });
+        }
+
+        function updateTradeStats(data) {
+            let total = data.length;
+            let wins = 0;
+            let profit = 0;
+            let loss = 0;
+
+            data.forEach(d => {
+                const p = parseFloat(d.profit);
+                if(d.result === 'win') {
+                    wins++;
+                    profit += p;
+                } else {
+                    loss += Math.abs(p);
+                }
+            });
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statWinRate').textContent = total > 0 ? Math.round((wins / total) * 100) + '%' : '0%';
+            document.getElementById('statProfit').textContent = '+' + profit.toFixed(2);
+            document.getElementById('statLoss').textContent = '-' + loss.toFixed(2);
+        }
+    </script>
+</body>
+</html>

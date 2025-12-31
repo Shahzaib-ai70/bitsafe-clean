@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitsafe - Assets</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+        }
+        .text-green-custom {
+            color: #0ECB81;
+        }
+        .bg-green-custom {
+            background-color: #0ECB81;
+        }
+        .text-yellow-custom {
+            color: #F0B90B;
+        }
+        .bg-yellow-custom {
+            background-color: #ffb11a;
+        }
+        .bottom-nav-item.active {
+            color: #1f2937;
+        }
+        .bottom-nav-item {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="pb-20 max-w-md mx-auto bg-white min-h-screen shadow-lg overflow-x-hidden text-gray-900 transition-colors duration-200">
+    <!-- Top Header -->
+    <div class="p-4 flex items-center justify-between sticky top-0 bg-white z-10 transition-colors duration-200">
+        <div class="flex-1"></div>
+    </div>
+    <script>
+        (function () {
+            if (!localStorage.getItem('authUser')) {
+                window.location.replace('register.html');
+            }
+        })();
+    </script>
+
+    <!-- Top Tabs -->
+    <div class="px-4 pt-4 pb-2">
+        <div class="flex space-x-6 text-gray-400 font-medium text-lg overflow-x-auto no-scrollbar">
+            <div onclick="switchTab('Overview')" id="tab-Overview" class="text-gray-900 border-b-2 border-yellow-custom pb-1 font-bold cursor-pointer whitespace-nowrap">Overview</div>
+            <div onclick="switchTab('Futures')" id="tab-Futures" class="pb-1 cursor-pointer whitespace-nowrap hover:text-gray-600">Futures</div>
+            <div onclick="switchTab('Spot')" id="tab-Spot" class="pb-1 cursor-pointer whitespace-nowrap hover:text-gray-600">Spot</div>
+            <div onclick="switchTab('Funding')" id="tab-Funding" class="pb-1 cursor-pointer whitespace-nowrap hover:text-gray-600">Funding</div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="content-Overview">
+        <!-- Balance Section -->
+        <div class="px-4 py-4">
+            <div class="flex items-center text-gray-500 text-sm mb-1">
+                <span>Est.Total Value(USDT)</span>
+            </div>
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 id="totalBalance" class="text-4xl font-bold text-gray-800">0.00</h1>
+                    <div class="flex items-center text-gray-500 text-sm mt-1">
+                        <span id="totalBalanceUsd">≈ $0.00</span>
+                    </div>
+                    <div class="text-green-custom text-sm mt-1">
+                        0.00USDT(0%)
+                    </div>
+                </div>
+                <i class="fa-regular fa-eye text-gray-800 text-xl cursor-pointer"></i>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-4 gap-4 px-4 py-4">
+            <a href="deposit_currency.html" class="flex flex-col items-center cursor-pointer">
+                <div class="w-14 h-14 bg-yellow-custom rounded-2xl flex items-center justify-center mb-2 shadow-sm">
+                    <i class="fa-solid fa-wallet text-gray-900 text-xl"></i>
+                </div>
+                <span class="text-sm text-gray-800 font-medium">Deposit</span>
+            </a>
+            <div class="flex flex-col items-center cursor-pointer" onclick="document.getElementById('withdrawModal').classList.remove('hidden')">
+                <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-arrow-up-from-bracket text-gray-800 text-xl"></i>
+                </div>
+                <span class="text-sm text-gray-800 font-medium">Withdraw</span>
+            </div>
+            <div class="flex flex-col items-center cursor-pointer" onclick="document.getElementById('convertModal').classList.remove('hidden')">
+                <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-arrow-right-arrow-left text-gray-800 text-xl"></i>
+                </div>
+                <span class="text-sm text-gray-800 font-medium">Convert</span>
+            </div>
+            <div class="flex flex-col items-center cursor-pointer" onclick="openTransferModal()">
+                <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
+                    <i class="fa-solid fa-repeat text-gray-800 text-xl"></i>
+                </div>
+                <span class="text-sm text-gray-800 font-medium">Transfer</span>
+            </div>
+        </div>
+
+        <!-- Account List -->
+        <div class="px-4 mt-2">
+            <h2 class="text-lg font-medium text-gray-800 mb-4">Account</h2>
+            
+            <div class="space-y-6">
+                <!-- Futures Assets -->
+                <div class="flex justify-between items-center cursor-pointer" onclick="switchTab('Futures')">
+                    <span class="text-gray-800 font-medium">Futures Assets</span>
+                    <div class="text-right">
+                        <div class="text-gray-800 font-bold text-sm">0.00 <span class="text-xs">USDT</span></div>
+                        <div class="text-gray-400 text-xs">$ 0.00</div>
+                    </div>
+                </div>
+
+                <!-- Spot Assets -->
+                <div class="flex justify-between items-center cursor-pointer" onclick="switchTab('Spot')">
+                    <span class="text-gray-800 font-medium">Spot Assets</span>
+                    <div class="text-right">
+                        <div class="text-gray-800 font-bold text-sm">0.00 <span class="text-xs">USDT</span></div>
+                        <div class="text-gray-400 text-xs">$ 0.00</div>
+                    </div>
+                </div>
+
+                <!-- Funding Assets -->
+                <div class="flex justify-between items-center cursor-pointer" onclick="switchTab('Funding')">
+                    <span class="text-gray-800 font-medium">Funding Assets</span>
+                    <div class="text-right">
+                        <div class="text-gray-800 font-bold text-sm">0.00 <span class="text-xs">USDT</span></div>
+                        <div class="text-gray-400 text-xs">$ 0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Crypto Assets -->
+        <div class="px-4 mt-6 mb-20">
+            <h2 class="text-lg font-medium text-gray-800 mb-4">Crypto Assets</h2>
+            <div id="coinList" class="space-y-4">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-Tab Content Template (Futures, Spot, Funding) -->
+    <div id="content-SubTab" class="hidden">
+        <div class="px-4 py-8 flex flex-col items-center justify-center text-center">
+            <div class="text-gray-500 text-sm mb-1">Total Assets(USDT)</div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-1">0.00</h1>
+            <div class="text-gray-400 text-sm mb-8">≈ $0.00</div>
+
+            <div class="grid grid-cols-2 gap-4 w-full max-w-xs">
+                 <div class="flex flex-col items-center cursor-pointer" onclick="document.getElementById('convertModal').classList.remove('hidden')">
+                    <div class="w-14 h-14 bg-yellow-custom rounded-2xl flex items-center justify-center mb-2 shadow-sm">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-gray-900 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-gray-800 font-medium">Convert</span>
+                </div>
+                <div class="flex flex-col items-center cursor-pointer" onclick="openTransferModal()">
+                    <div class="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-2">
+                        <i class="fa-solid fa-repeat text-gray-800 text-xl"></i>
+                    </div>
+                    <span class="text-sm text-gray-800 font-medium">Transfer</span>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-gray-400 text-sm">
+                No assets in this account yet.
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 py-2 px-6 flex justify-between items-center z-20 max-w-md mx-auto">
+        <a href="index.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-house text-xl mb-1"></i>
+            <span class="text-[10px]">Home Page</span>
+        </a>
+        <a href="quotes.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-chart-simple text-xl mb-1"></i>
+            <span class="text-[10px]">Quotes</span>
+        </a>
+        <a href="transaction.html" class="relative -top-5">
+            <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+                <i class="fa-solid fa-arrow-right-arrow-left text-white text-lg transform rotate-45"></i>
+            </div>
+            <div class="text-center mt-1">
+                <span class="text-[10px] text-gray-500">Transaction</span>
+            </div>
+        </a>
+        <a href="futures.html" class="flex flex-col items-center bottom-nav-item cursor-pointer">
+            <i class="fa-solid fa-file-contract text-xl mb-1"></i>
+            <span class="text-[10px]">Futures</span>
+        </a>
+        <div class="flex flex-col items-center bottom-nav-item active text-gray-900 cursor-pointer">
+            <i class="fa-solid fa-wallet text-xl mb-1"></i>
+            <span class="text-[10px]">Assets</span>
+        </div>
+    </div>
+
+
+
+    <!-- Profile Menu -->
+    <div id="profileMenu" class="hidden fixed inset-0 z-50 flex justify-start">
+        <div class="absolute inset-0 bg-black bg-opacity-50 transition-opacity" onclick="document.getElementById('profileMenu').classList.add('hidden')"></div>
+        <div class="relative bg-white w-80 h-full shadow-xl transform transition-transform duration-300 flex flex-col">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-yellow-custom flex items-center justify-center text-lg font-bold text-gray-900 shadow-sm">
+                        U
+                    </div>
+                    <div>
+                        <div class="font-bold text-lg text-gray-900">User8932</div>
+                        <div class="text-xs text-gray-500 bg-white px-2 py-0.5 rounded-full border border-gray-200 inline-block mt-1">ID: 8932451</div>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('profileMenu').classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-500 transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Menu Items -->
+            <div class="flex-1 overflow-y-auto py-2">
+                <div class="px-4 py-2">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Account</div>
+                    <button onclick="document.getElementById('primaryInfoModal').classList.remove('hidden')" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
+                            <i class="fa-regular fa-id-card"></i>
+                        </div>
+                        <span class="font-medium">Primary Verification</span>
+                        <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-400"></i>
+                    </button>
+                    <button onclick="document.getElementById('advancedCertModal').classList.remove('hidden')" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-500">
+                            <i class="fa-solid fa-certificate"></i>
+                        </div>
+                        <span class="font-medium">Advanced Certification</span>
+                        <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-400"></i>
+                    </button>
+                    <button onclick="document.getElementById('teamModal').classList.remove('hidden')" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-500">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <span class="font-medium">My Team</span>
+                        <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-400"></i>
+                    </button>
+                </div>
+
+                <div class="border-t border-gray-100 my-2"></div>
+
+                <div class="px-4 py-2">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Finance</div>
+                    <a href="history.html" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <span class="font-medium">History</span>
+                        <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-400"></i>
+                    </a>
+                </div>
+
+                <div class="border-t border-gray-100 my-2"></div>
+
+                <div class="px-4 py-2">
+                    <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">Settings</div>
+                    <button onclick="document.getElementById('languageModal').classList.remove('hidden')" class="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors">
+                        <div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-500">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <div class="font-medium">Language</div>
+                            <div class="text-xs text-gray-500" id="currentLangDisplay">English</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right ml-auto text-xs text-gray-400"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-red-500 font-semibold rounded-xl hover:bg-red-50 transition-colors shadow-sm">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Log Out</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Modal -->
+    <div id="languageModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative animate-scale-up mx-4">
+            <button onclick="document.getElementById('languageModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Select Language</h2>
+            <div class="space-y-2">
+                <button onclick="changeLanguage('en')" class="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 border border-gray-100 transition-all group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🇺🇸</span>
+                        <span class="font-medium text-gray-700 group-hover:text-gray-900">English</span>
+                    </div>
+                    <i class="fa-solid fa-check text-green-500 hidden" id="lang-check-en"></i>
+                </button>
+                <button onclick="changeLanguage('es')" class="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 border border-gray-100 transition-all group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🇪🇸</span>
+                        <span class="font-medium text-gray-700 group-hover:text-gray-900">Español</span>
+                    </div>
+                    <i class="fa-solid fa-check text-green-500 hidden" id="lang-check-es"></i>
+                </button>
+                <button onclick="changeLanguage('zh')" class="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 border border-gray-100 transition-all group">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">🇨🇳</span>
+                        <span class="font-medium text-gray-700 group-hover:text-gray-900">中文</span>
+                    </div>
+                    <i class="fa-solid fa-check text-green-500 hidden" id="lang-check-zh"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Primary Info Modal -->
+    <div id="primaryInfoModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md mx-4 rounded-2xl p-6 relative">
+             <button onclick="document.getElementById('primaryInfoModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Primary Information</h2>
+            <p class="text-gray-600 mb-4">Complete your primary information verification.</p>
+            <button id="piSubmitBtn" class="w-full bg-yellow-custom py-3 rounded-xl font-bold text-gray-900">Verify Now</button>
+        </div>
+    </div>
+
+    <!-- Advanced Cert Modal -->
+    <div id="advancedCertModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md mx-4 rounded-2xl p-6 relative">
+             <button onclick="document.getElementById('advancedCertModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Advanced Certification</h2>
+            <p class="text-gray-600 mb-4">Complete your advanced certification for higher limits.</p>
+            <button id="acSubmitBtn" class="w-full bg-yellow-custom py-3 rounded-xl font-bold text-gray-900">Verify Now</button>
+        </div>
+    </div>
+
+    <script src="translations.js"></script>
+
+
+    <!-- Convert Modal -->
+    <div id="convertModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Convert to USDT</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-gray-50 p-4 rounded-xl">
+                    <label class="text-xs text-gray-500 mb-1 block">From</label>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i id="convertIcon" class="fa-brands fa-bitcoin text-yellow-500 text-xl"></i>
+                            <span id="convertSymbol" class="font-bold text-gray-800 text-lg">BTC</span>
+                        </div>
+                        <div class="text-right">
+                            <input type="number" id="convertAmount" class="w-32 bg-transparent text-right font-bold text-lg outline-none" placeholder="0.00">
+                            <div class="text-xs text-gray-400">Balance: <span id="convertBalance">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-center">
+                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-arrow-down text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-xl">
+                    <label class="text-xs text-gray-500 mb-1 block">To</label>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <div id="convertTargetIconContainer" class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                                <span id="convertTargetIconText">T</span>
+                            </div>
+                            <span id="convertTargetSymbol" class="font-bold text-gray-800 text-lg">USDT</span>
+                        </div>
+                        <div class="text-right">
+                            <div id="convertPreview" class="font-bold text-gray-800 text-lg">0.00</div>
+                            <div class="text-xs text-gray-400">Rate: <span id="convertRate">...</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="submitConversion()" id="btnConvert" class="w-full bg-yellow-custom py-4 rounded-xl font-bold text-gray-900 mt-4 shadow-lg shadow-yellow-500/20">
+                    Preview Conversion
+                </button>
+            </div>
+
+            <button onclick="closeConvertModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div id="transferModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Transfer</h2>
+            
+            <div class="space-y-4">
+                 <!-- From/To Section -->
+                <div class="flex items-center justify-between bg-gray-50 p-4 rounded-xl relative">
+                     <div class="flex-1">
+                        <div class="text-xs text-gray-400 mb-1">From</div>
+                        <div class="font-bold text-gray-800">Spot Account</div>
+                     </div>
+                     <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-gray-400 transform rotate-90"></i>
+                     </div>
+                     <div class="flex-1 text-right">
+                        <div class="text-xs text-gray-400 mb-1">To</div>
+                        <div class="font-bold text-gray-800">Futures Account</div>
+                     </div>
+                </div>
+
+                <!-- Coin Selection -->
+                <div class="flex justify-between items-center p-3 border rounded-xl">
+                    <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">T</div>
+                        <span class="font-bold text-gray-800">USDT</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-400 text-xs"></i>
+                </div>
+
+                <!-- Amount -->
+                <div>
+                    <label class="text-xs text-gray-500 mb-1 block">Amount</label>
+                    <div class="flex items-center border rounded-xl px-4 py-3">
+                        <input type="number" class="w-full bg-transparent outline-none font-bold text-gray-800" placeholder="0.00">
+                        <span class="text-yellow-custom font-bold text-sm ml-2">MAX</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-1">Available: 0.00 USDT</div>
+                </div>
+
+                <button class="w-full bg-yellow-custom py-4 rounded-xl font-bold text-gray-900 mt-4 shadow-lg shadow-yellow-500/20">
+                    Confirm Transfer
+                </button>
+            </div>
+
+            <button onclick="document.getElementById('transferModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-md rounded-t-2xl p-6 relative animate-slide-up">
+            <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-6"></div>
+            
+            <h2 class="text-lg font-bold text-gray-800 mb-6">Select withdrawal method</h2>
+            
+            <a href="withdraw_currency.html" class="flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                <div class="w-10 h-10 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-gray-900 mr-4">
+                    <i class="fa-solid fa-arrow-up-from-bracket"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-800">Ordinary Withdraw</div>
+                    <div class="text-xs text-gray-400">Transfer from wallet or exchange</div>
+                </div>
+            </a>
+
+            <!-- Close Modal Area -->
+            <button onclick="document.getElementById('withdrawModal').classList.add('hidden')" class="absolute top-0 right-0 p-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Team Modal -->
+    <div id="teamModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white w-full max-w-sm rounded-2xl p-6 relative animate-scale-up mx-4">
+            <button onclick="document.getElementById('teamModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-users text-3xl text-blue-500"></i>
+                </div>
+                <h2 class="text-xl font-bold text-gray-800 mb-2">My Team</h2>
+                <div class="text-4xl font-bold text-gray-800 mb-2" id="teamCount">0</div>
+                <p class="text-gray-500 text-sm">Total Members</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Reset Tabs
+            ['Overview', 'Futures', 'Spot', 'Funding'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if(el) {
+                    el.className = 'pb-1 cursor-pointer whitespace-nowrap hover:text-gray-600';
+                    if(t === tabName) {
+                        el.className = 'text-gray-900 border-b-2 border-yellow-custom pb-1 font-bold cursor-pointer whitespace-nowrap';
+                    }
+                }
+            });
+
+            // Show Content
+            if(tabName === 'Overview') {
+                document.getElementById('content-Overview').classList.remove('hidden');
+                document.getElementById('content-SubTab').classList.add('hidden');
+            } else {
+                document.getElementById('content-Overview').classList.add('hidden');
+                document.getElementById('content-SubTab').classList.remove('hidden');
+            }
+        }
+
+        function openTransferModal() {
+            document.getElementById('transferModal').classList.remove('hidden');
+        }
+
+        let currentPrices = {};
+        let currentBalances = [];
+        let selectedCoin = null;
+
+        (function () {
+            if (!localStorage.getItem('authUser')) {
+                window.location.replace('register.html');
+            } else {
+                fetchData();
+            }
+        })();
+
+        async function fetchData() {
+            const u = localStorage.getItem('authUser');
+            if(!u) return;
+
+            try {
+                // 1. Fetch Prices
+                const priceRes = await fetch('/api/prices');
+                currentPrices = await priceRes.json();
+
+                // 2. Fetch User Data
+                const userRes = await fetch('/api/me', { headers: { 'x-user': u } });
+                const userData = await userRes.json();
+
+                if (userData) {
+                    renderPage(userData);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderPage(d) {
+            // Calculate Total Estimated Value
+            let totalUsdt = 0;
+
+            // 1. Add Main Balance (Legacy USDT)
+            if (d.balance) {
+                totalUsdt += d.balance;
+            }
+
+            // 2. Add Coin Balances
+            if (d.balances && Array.isArray(d.balances)) {
+                currentBalances = d.balances;
+                d.balances.forEach(coin => {
+                    if (coin.currency !== 'USDT') { // Avoid double counting if USDT is in balances
+                        const price = currentPrices[coin.currency] || 0;
+                        totalUsdt += coin.amount * price;
+                    } else if (d.balance === 0) {
+                        // If legacy balance is 0 but user_balances has USDT, use that?
+                        // For safety, let's assume legacy balance is the source of truth for USDT for now.
+                        // Or we can just ignore USDT in user_balances if we trust legacy.
+                    }
+                });
+            }
+
+            // Update Total Displays
+            const totalEl = document.getElementById('totalBalance');
+            if(totalEl) totalEl.textContent = totalUsdt.toFixed(2);
+            
+            const totalUsdEl = document.getElementById('totalBalanceUsd');
+            if(totalUsdEl) totalUsdEl.textContent = '≈ $' + totalUsdt.toFixed(2);
+
+            const fastEl = document.getElementById('fastAssetsBalance');
+            if(fastEl) fastEl.textContent = totalUsdt.toFixed(2);
+            
+            const fastUsdEl = document.getElementById('fastAssetsUsd');
+            if(fastUsdEl) fastUsdEl.textContent = '$ ' + totalUsdt.toFixed(2);
+
+            // Render Coin List
+            const coinListEl = document.getElementById('coinList');
+            if (coinListEl && d.balances) {
+                coinListEl.innerHTML = '';
+                d.balances.forEach(coin => {
+                    if (coin.amount > 0) {
+                        const price = currentPrices[coin.currency] || 0;
+                        const valueInUsdt = coin.amount * price;
+                        
+                        const item = document.createElement('div');
+                        item.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors';
+                        item.onclick = () => openConvertModal(coin);
+                        
+                        let iconClass = 'fa-coins';
+                        if(coin.currency === 'BTC') iconClass = 'fa-bitcoin';
+                        else if(coin.currency === 'ETH') iconClass = 'fa-ethereum';
+                        
+                        item.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-yellow-600">
+                                    <i class="fa-brands ${iconClass} text-xl"></i>
+                                </div>
+                                <div>
+                                    <div class="text-gray-800 font-medium">${coin.currency}</div>
+                                    <div class="text-xs text-gray-400">$${price.toLocaleString()}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-gray-800 font-bold text-sm">${coin.amount.toFixed(6)}</div>
+                                <div class="text-xs text-gray-400">≈ ${valueInUsdt.toFixed(2)} USDT</div>
+                            </div>
+                        `;
+                        coinListEl.appendChild(item);
+                    }
+                });
+            }
+        }
+
+        // --- Conversion Logic ---
+
+        let targetCurrency = 'USDT';
+
+        function openConvertModal(coin) {
+            // Logic for Target
+            if (coin.currency === 'USDT') {
+                targetCurrency = 'BTC'; // Default target for USDT
+            } else {
+                targetCurrency = 'USDT';
+            }
+
+            selectedCoin = coin;
+            const modal = document.getElementById('convertModal');
+            
+            document.querySelector('#convertModal h2').textContent = 'Convert to ' + targetCurrency;
+            
+            // Set FROM Symbols
+            document.getElementById('convertSymbol').textContent = coin.currency;
+            document.getElementById('convertBalance').textContent = coin.amount;
+            
+            // Set FROM Icon
+            const icon = document.getElementById('convertIcon');
+            // Reset base classes
+            icon.className = "";
+            icon.innerHTML = "";
+            
+            if (coin.currency === 'USDT') {
+                 icon.className = "fa-solid fa-t text-green-500 text-xl";
+            } else if (coin.currency === 'BTC') {
+                 icon.className = "fa-brands fa-bitcoin text-yellow-500 text-xl";
+            } else if (coin.currency === 'ETH') {
+                 icon.className = "fa-brands fa-ethereum text-purple-500 text-xl";
+            } else {
+                 icon.className = "fa-solid fa-coins text-yellow-500 text-xl";
+            }
+
+            // Set TO Symbols
+            document.getElementById('convertTargetSymbol').textContent = targetCurrency;
+            const targetIconContainer = document.getElementById('convertTargetIconContainer');
+            const targetIconText = document.getElementById('convertTargetIconText');
+            
+            // Reset Target Icon
+            targetIconContainer.className = "w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold";
+            targetIconText.innerHTML = "";
+
+            if (targetCurrency === 'USDT') {
+                targetIconContainer.classList.add('bg-green-500');
+                targetIconText.textContent = "T";
+            } else if (targetCurrency === 'BTC') {
+                targetIconContainer.classList.add('bg-yellow-500');
+                targetIconText.innerHTML = '<i class="fa-brands fa-bitcoin"></i>';
+            } else {
+                targetIconContainer.classList.add('bg-gray-400');
+                targetIconText.innerHTML = '<i class="fa-solid fa-coins"></i>';
+            }
+
+            // Reset Inputs
+            const input = document.getElementById('convertAmount');
+            input.value = '';
+            document.getElementById('convertPreview').textContent = '0.00';
+            
+            // Calculate Rate
+            let rate = 0;
+            if (targetCurrency === 'USDT') {
+                rate = currentPrices[coin.currency] || 0;
+            } else {
+                // USDT -> Coin
+                const price = currentPrices[targetCurrency] || 1;
+                rate = 1 / price;
+            }
+            
+            document.getElementById('convertRate').textContent = '1 ' + coin.currency + ' ≈ ' + rate.toPrecision(6) + ' ' + targetCurrency;
+
+            // Input Listener
+            input.oninput = function() {
+                const val = parseFloat(this.value);
+                if (val) {
+                    const estimated = val * rate;
+                    document.getElementById('convertPreview').textContent = estimated.toFixed(6);
+                } else {
+                    document.getElementById('convertPreview').textContent = '0.00';
+                }
+            };
+
+            // Set Max
+            input.onclick = () => {
+                if(!input.value) input.value = coin.amount;
+                input.dispatchEvent(new Event('input'));
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeConvertModal() {
+            document.getElementById('convertModal').classList.add('hidden');
+            selectedCoin = null;
+        }
+
+        function submitConversion() {
+            if (!selectedCoin) return;
+            const amount = parseFloat(document.getElementById('convertAmount').value);
+            
+            if (!amount || amount <= 0 || amount > selectedCoin.amount) {
+                alert("Invalid amount");
+                return;
+            }
+
+            const btn = document.getElementById('btnConvert');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Converting...';
+            btn.disabled = true;
+
+            const u = localStorage.getItem('authUser');
+            fetch('/api/convert', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user': u
+                },
+                body: JSON.stringify({
+                    fromCurrency: selectedCoin.currency,
+                    toCurrency: targetCurrency,
+                    amount: amount
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    alert(`Successfully converted ${amount} ${selectedCoin.currency} to ${res.convertedAmount.toFixed(6)} ${targetCurrency}`);
+                    closeConvertModal();
+                    fetchData(); // Refresh
+                } else {
+                    alert("Error: " + res.error);
+                }
+            })
+            .catch(e => alert("Error: " + e.message))
+            .finally(() => {
+                btn.innerHTML = 'Convert';
+                btn.disabled = false;
+            });
+        }
+
+        const menuEl = document.getElementById('profileMenu');
+        const menuBackBtn = document.getElementById('menuBackBtn');
+        const userNameEl = document.getElementById('menuUserName');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        menuBackBtn?.addEventListener('click', function () {
+            menuEl.classList.add('hidden');
+        });
+        logoutBtn?.addEventListener('click', function () {
+            fetch('/api/logout', { method: 'POST' })
+            .finally(() => {
+                localStorage.removeItem('authUser');
+                window.location.href = 'login.html';
+            });
+        });
+
+        // --- Additional Profile Logic ---
+        const btnPrimaryInfo = document.getElementById('btnPrimaryInfo');
+        const btnAdvancedCert = document.getElementById('btnAdvancedCert');
+        const primaryInfoModal = document.getElementById('primaryInfoModal');
+        const advancedCertModal = document.getElementById('advancedCertModal');
+        const userIdEl = document.getElementById('menuUserId');
+
+        btnPrimaryInfo?.addEventListener('click', () => {
+             primaryInfoModal.classList.remove('hidden');
+        });
+        btnAdvancedCert?.addEventListener('click', () => {
+             advancedCertModal.classList.remove('hidden');
+        });
+
+        // Language Logic
+        function openLanguageModal() {
+            const modal = document.getElementById('languageModal');
+            const list = document.getElementById('languageList');
+            modal.classList.remove('hidden');
+            
+            // Populate languages if empty
+            if(list.children.length === 0) {
+                 const langs = ['English', 'Español', 'Français', 'Deutsch', 'Italiano', 'Português', 'Русский', '中文', '日本語', '한국어'];
+                 list.innerHTML = langs.map(l => `
+                    <div onclick="selectLanguage('${l}')" class="p-3 hover:bg-gray-50 rounded-lg cursor-pointer flex justify-between items-center">
+                        <span class="text-gray-800">${l}</span>
+                        ${l === (localStorage.getItem('appLanguage') || 'English') ? '<i class="fa-solid fa-check text-yellow-600"></i>' : ''}
+                    </div>
+                 `).join('');
+            }
+        }
+
+        function selectLanguage(lang) {
+            localStorage.setItem('appLanguage', lang);
+            document.getElementById('currentLangDisplay').textContent = lang;
+            document.getElementById('languageModal').classList.add('hidden');
+            if(typeof setLanguage === 'function') setLanguage(lang);
+        }
+
+        // Initialize Language Display
+        (function(){
+            const saved = localStorage.getItem('appLanguage') || 'English';
+            const d = document.getElementById('currentLangDisplay');
+            if(d) d.textContent = saved;
+        })();
+    </script>
+</body>
+</html>
