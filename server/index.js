@@ -677,36 +677,7 @@ app.get("/api/klines", async (req, res) => {
   }
 });
 
-app.get("/api/markets", async (req, res) => {
-  try {
-    const symbols = req.query.symbols
-      ? JSON.parse(req.query.symbols)
-      : [
-          "BTCUSDT","ETHUSDT","BNBUSDT","XRPUSDT","ADAUSDT",
-          "SOLUSDT","DOGEUSDT","TRXUSDT","LTCUSDT","DOTUSDT"
-        ];
 
-    const url =
-      "https://api.binance.com/api/v3/ticker/24hr?symbols=" +
-      encodeURIComponent(JSON.stringify(symbols));
-
-    const r = await fetch(url);
-    const data = await r.json();
-
-    const markets = data.map(m => ({
-      symbol: m.symbol,
-      price: m.lastPrice,
-      changePercent: m.priceChangePercent,
-      high: m.highPrice,
-      low: m.lowPrice,
-      volume: m.volume
-    }));
-
-    res.json(markets);
-  } catch (e) {
-    res.status(500).json({ error: "market_fetch_failed" });
-  }
-});
 
 /* ================== USERS (ADMIN) ================== */
 app.get("/api/admin/users", async (req, res) => {

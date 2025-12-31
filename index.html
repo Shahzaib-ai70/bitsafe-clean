@@ -714,7 +714,7 @@
             const document_number = document.getElementById('piDocNumber').value.trim();
             if(!first_name || !last_name || !document_type || !document_number) { alert('Fill all fields'); return; }
             try {
-              const r = await fetch('http://localhost:3001/api/verification/primary', {
+              const r = await fetch('/api/verification/primary', {
                  method: 'POST',
                  headers: { 'Content-Type': 'application/json', 'x-user': u },
                  body: JSON.stringify({ first_name, last_name, document_type, document_number })
