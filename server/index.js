@@ -335,23 +335,31 @@ app.get("/api/prices", async (req, res) => {
 app.get("/api/markets", async (req, res) => {
     try {
         const symbolsParam = req.query.symbols;
-        if (!symbolsParam) return res.json([]);
         
-        // Pass the symbols array directly to Binance API
-        // Binance expects format: symbols=["BTCUSDT","ETHUSDT"]
-        const response = await fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(symbolsParam)}`);
+        // If symbols provided, use them. Otherwise fetch all (filtered later)
+        let url = 'https://api.binance.com/api/v3/ticker/24hr';
+        if (symbolsParam) {
+            url += `?symbols=${encodeURIComponent(symbolsParam)}`;
+        }
+        
+        const response = await fetch(url);
         
         if (!response.ok) {
             console.error("Binance API error:", response.statusText);
-             // If Binance fails, return empty array so frontend doesn't break
             return res.json([]);
         }
         
-        const data = await response.json();
+        let data = await response.json();
         
-        // If data is just one object (single symbol requested), wrap in array
         if (!Array.isArray(data)) {
-            return res.json([data]);
+            data = [data];
+        }
+
+        // If no specific symbols requested, filter for USDT pairs and sort by volume
+        if (!symbolsParam) {
+            data = data.filter(item => item.symbol.endsWith('USDT'));
+            // Sort by quote volume (USDT volume) descending
+            data.sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume));
         }
         
         res.json(data);
