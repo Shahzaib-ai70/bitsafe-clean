@@ -508,6 +508,7 @@
         
         // Initialize Language
         (function(){
+            console.log("App Version: v2.1 - Loaded");
             const savedLang = localStorage.getItem('appLanguage') || 'English';
             setLanguage(savedLang);
             const currentLangDisplay = document.getElementById('currentLangDisplay');
