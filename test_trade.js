@@ -1,6 +1,6 @@
 
 async function test() {
-    const api = 'http://localhost:3001';
+    const api = process.env.API_URL || 'http://127.0.0.1:3001';
     
     // 1. Create/Reset user
     const user = 'testuser_' + Date.now();

@@ -746,7 +746,7 @@
             fd.append('back', back);
             fd.append('selfie', selfie);
             try {
-              const r = await fetch('http://localhost:3001/api/verification/advanced', {
+              const r = await fetch('/api/verification/advanced', {
                  method: 'POST',
                  headers: { 'x-user': u },
                  body: fd
