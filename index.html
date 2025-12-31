@@ -534,6 +534,7 @@
         })();
 
         const gridBtn = document.getElementById('gridMenuBtn');
+        if (!gridBtn) console.error("Profile button not found!");
         const menuEl = document.getElementById('profileMenu');
         const menuBackBtn = document.getElementById('menuBackBtn');
         const userNameEl = document.getElementById('menuUserName');
@@ -585,6 +586,7 @@
         });
 
         gridBtn?.addEventListener('click', function () {
+            console.log("Profile button clicked");
             const u = localStorage.getItem('authUser');
             userNameEl.textContent = u ? u : 'Guest';
             menuEl.classList.remove('hidden');
@@ -1020,6 +1022,10 @@
                 </div>`;
             }).join("");
             container.innerHTML = html;
+        }
+
+        async function refresh() {
+            await fetchPrices(currentTab);
         }
 
         // Initial fetch and interval
